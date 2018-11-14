@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">KnuckleInput</string>
+    <string name="train">Train</string>
+    <string name="pocket">Pocket</string>
+    <string name="hand">Hand</string>
+    <string name="walking">Walking</string>
+</resources>
