@@ -25,5 +25,4 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="137dp"
         android:text="Start" />
-
 </RelativeLayout>

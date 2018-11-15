@@ -30,15 +30,11 @@ public class MainActivity extends AppCompatActivity {
                     startTask(v);
                 }
             }
-
-
         });
-
     }
 
     public void startTask(View view) {
         Intent intent = new Intent(this, TaskActivity.class);
         startActivity(intent);
     }
-
 }
