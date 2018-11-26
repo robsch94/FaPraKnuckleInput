@@ -20,8 +20,6 @@ public class TaskActivity extends AppCompatActivity {
     public int taskID;
     public TaskContentDescription [] taskContentDescriptions = new TaskContentDescription[20];
 
-    DrawView drawView;
-
     private void setupTask() {
 
         final String [] topImages = new String[20];
@@ -45,21 +43,12 @@ public class TaskActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_task);
-        drawView = new DrawView(this);
-        //TODO only NullPointers with this line
-        //setContentView(drawView);
-        drawView.setBackgroundColor(Color.WHITE);
 
         LocalDeviceHandler localDeviceHandler = new LocalDeviceHandler();
         localDeviceHandler.setLocalCapImgListener(new LocalCapImgListener() {
             @Override
             public void onLocalCapImg(final CapacitiveImageTS capImg) { // called approximately every 50ms
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        drawView.setImage(capImg);
-                    }
-                });
+                storeData(capImg);
             }
         });
         localDeviceHandler.startHandler();
@@ -106,4 +95,9 @@ public class TaskActivity extends AppCompatActivity {
 
 
     }
+
+    void storeData(CapacitiveImageTS capImg) {
+
+    }
+
 }

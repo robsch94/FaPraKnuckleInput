@@ -27,6 +27,7 @@ public class DrawView extends View {
 
     @Override
     public void onDraw(Canvas canvas) {
+        System.out.println("capture");
         paint.setStyle(Paint.Style.FILL);
         int[][] matrix = capacitiveImage.getMatrix();
 
