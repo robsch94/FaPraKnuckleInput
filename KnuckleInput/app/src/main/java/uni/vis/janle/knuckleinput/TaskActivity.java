@@ -4,6 +4,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -37,9 +39,15 @@ public class TaskActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_task);
         drawView = new DrawView(this);
-        setContentView(drawView);
+        //TODO only NullPointers with this line
+        //setContentView(drawView);
         drawView.setBackgroundColor(Color.WHITE);
 
         LocalDeviceHandler localDeviceHandler = new LocalDeviceHandler();
@@ -61,7 +69,7 @@ public class TaskActivity extends AppCompatActivity {
         ImageButton button_next = findViewById(R.id.button_next);
         ImageButton button_revert = findViewById(R.id.button_revert);
 
-        final TextView text_inputMethod = findViewById(R.id.text_inputMethod);
+        final TextView text_inputMethod = (TextView) findViewById(R.id.text_inputMethod);
 
         final TextView text_gesture = findViewById(R.id.text_gesture);
 
@@ -69,7 +77,9 @@ public class TaskActivity extends AppCompatActivity {
         taskID = 0;
 
         TaskContentDescription taskDescription = taskContentDescriptions[0];
-        text_inputMethod.setText(taskDescription.getInputMethodText());
+        //text_inputMethod.setText(taskDescription.getInputMethodText());
+        System.out.println(text_inputMethod);
+        text_inputMethod.setText("Hello World!");
         text_gesture.setText(taskDescription.getGestureText());
 
         versionID = 0;
