@@ -24,6 +24,7 @@ public class DrawView extends View {
         invalidate();
     }
 
+
     @Override
     public void onDraw(Canvas canvas) {
         paint.setStyle(Paint.Style.FILL);
