@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (!TextUtils.isEmpty(userID.getText())) {
                     Toast.makeText(getApplicationContext(), "gj!", Toast.LENGTH_SHORT).show();
+                    UserData.USERID = Integer.valueOf(userID.getText().toString());
                     String userGender = femaleInput.isChecked() ? "female" : "male";
                     String userData = userID.getText() + ";" + userAge.getText() + ";" + userGender;
                     FileOutputStream outputStream;

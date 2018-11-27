@@ -1,5 +1,6 @@
 package uni.vis.janle.knuckleinput;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -13,12 +14,18 @@ import org.hcilab.libftsp.LocalDeviceHandler;
 import org.hcilab.libftsp.capacitivematrix.capmatrix.CapacitiveImageTS;
 import org.hcilab.libftsp.listeners.LocalCapImgListener;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 public class TaskActivity extends AppCompatActivity {
     private String TAG = "TaskActivity";
 
     public int versionID;
     public int taskID;
     public TaskContentDescription [] taskContentDescriptions = new TaskContentDescription[20];
+    // output stream for capacitive matrix
+    private FileOutputStream matrixOutputStream;
+
 
     private void setupTask() {
 
@@ -73,6 +80,13 @@ public class TaskActivity extends AppCompatActivity {
 
         versionID = 0;
 
+        //create file output for capacitive matrix
+        try {
+            matrixOutputStream = openFileOutput(String.valueOf(UserData.USERID) + "_studyData.csv", Context.MODE_APPEND);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         button_next.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -97,7 +111,13 @@ public class TaskActivity extends AppCompatActivity {
     }
 
     void storeData(CapacitiveImageTS capImg) {
-
+        try {
+            //TODO to slow (currently only 12 samples per second and not 20)
+            //TODO flush at the end (not shure, if a problem)
+            matrixOutputStream.write((capImg.toString() + "\n").getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
