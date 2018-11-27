@@ -8,14 +8,14 @@
 
 
     <EditText
-        android:id="@+id/userIDText"
+        android:id="@+id/id_input"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="217dp"
+        android:layout_marginBottom="436dp"
         android:ems="10"
-        android:inputType="numberDecimal" />
+        android:inputType="number" />
 
     <Button
         android:id="@+id/startButton"
@@ -25,4 +25,69 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="137dp"
         android:text="Start" />
+
+    <TextView
+        android:id="@+id/id_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/id_input"
+        android:layout_marginEnd="45dp"
+        android:layout_marginBottom="0dp"
+        android:layout_toStartOf="@+id/startButton"
+        android:text="ID:" />
+
+    <TextView
+        android:id="@+id/age_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/id_input"
+        android:layout_alignStart="@+id/id_input"
+        android:layout_marginTop="-436dp"
+        android:text="Age:" />
+
+    <EditText
+        android:id="@+id/age_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/age_text"
+        android:layout_alignStart="@+id/id_input"
+        android:ems="10"
+        android:inputType="number" />
+
+    <TextView
+        android:id="@+id/gender_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/age_input"
+        android:layout_alignStart="@+id/id_input"
+        android:text="Gender:" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/gender_text"
+        android:layout_alignStart="@+id/id_input">
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1" >
+
+            <RadioButton
+                android:id="@+id/female_input"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="female" />
+
+            <RadioButton
+                android:id="@+id/male_input"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="male" />
+
+        </RadioGroup>
+
+    </LinearLayout>
 </RelativeLayout>
