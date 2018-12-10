@@ -49,9 +49,9 @@ public class TaskActivity extends AppCompatActivity {
             knuckleTasks.add(new TaskContentDescription(R.drawable.arrowheadright, "Arrowhead right", "Knuckle"));
             knuckleTasks.add(new TaskContentDescription(R.drawable.checkmark, "Checkmark", "Knuckle"));
             knuckleTasks.add(new TaskContentDescription(R.drawable.flashlight, "Γ", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.L, "L", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.Lmirrored, "Mirrored L", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.Screenshot, "S", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.l, "L", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.lmirrored, "Mirrored L", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.screenshot, "S", "Knuckle"));
             knuckleTasks.add(new TaskContentDescription(R.drawable.rotate, "Press and rotate knuckle", "Knuckle"));
 
             fingerTasks.add(new TaskContentDescription(R.drawable.tap, "Tap", "Finger"));
@@ -67,9 +67,9 @@ public class TaskActivity extends AppCompatActivity {
             fingerTasks.add(new TaskContentDescription(R.drawable.arrowheadright, "Arrowhead right", "Finger"));
             fingerTasks.add(new TaskContentDescription(R.drawable.checkmark, "Checkmark", "Finger"));
             fingerTasks.add(new TaskContentDescription(R.drawable.flashlight, "Γ", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.L, "L", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.Lmirrored, "Mirrored L", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.Screenshot, "S", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.l, "L", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.lmirrored, "Mirrored L", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.screenshot, "S", "Finger"));
             fingerTasks.add(new TaskContentDescription(R.drawable.rotate, "Press and rotate finger", "Finger"));
         }
 
@@ -100,7 +100,7 @@ public class TaskActivity extends AppCompatActivity {
         localDeviceHandler.setLocalCapImgListener(new LocalCapImgListener() {
             @Override
             public void onLocalCapImg(final CapacitiveImageTS capImg) { // called approximately every 50ms
-                storeData(capImg);
+                //storeData(capImg);
             }
         });
         localDeviceHandler.startHandler();
@@ -114,7 +114,14 @@ public class TaskActivity extends AppCompatActivity {
         // Initialise taskID, get userID from MainActivity
         taskID = 0;
         Bundle b = getIntent().getExtras();
-        this.userID = b.getInt("userID");
+        /*String id_string = b.getString("userID");
+        //TODO no userID here, always null
+        try {
+            this.userID = Integer.valueOf(id_string);
+        }catch (NumberFormatException e) {
+            this.userID = 1;
+        }*/
+        this.userID = 1;
 
         // setup TaskContentDescriptions
         final List<TaskContentDescription> taskContDescs = this.setupTask();
