@@ -1,30 +1,21 @@
 package uni.vis.janle.knuckleinput;
 
 public class TaskContentDescription {
-    private String topImage, botImage, gestureText, inputMethodText;
+    private int image;
+    private String gestureText, inputMethodText;
 
-
-    public TaskContentDescription(String topImage, String botImage, String gestureText, String inputMethodText) {
-        this.topImage = topImage;
-        this.botImage = botImage;
+    public TaskContentDescription(int image, String gestureText, String inputMethodText) {
+        this.image = image;
         this.gestureText = gestureText;
         this.inputMethodText = inputMethodText;
     }
 
-    public String getBotImage() {
-        return botImage;
+    public int getImage() {
+        return image;
     }
 
-    public void setBotImage(String botImage) {
-        this.botImage = botImage;
-    }
-
-    public String getTopImage() {
-        return topImage;
-    }
-
-    public void setTopImage(String topImage) {
-        this.topImage = topImage;
+    public void setImage(int image) {
+        this.image = image;
     }
 
     public String getGestureText() {

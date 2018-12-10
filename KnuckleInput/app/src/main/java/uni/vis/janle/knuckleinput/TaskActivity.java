@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,32 +33,56 @@ public class TaskActivity extends AppCompatActivity {
 
     private List<TaskContentDescription> setupTask() {
         List<TaskContentDescription> taskContDescs = new ArrayList<>();
+        List<TaskContentDescription> knuckleTasks = new ArrayList<>();
+        List<TaskContentDescription> fingerTasks = new ArrayList<>();
         for (int repitition = 0; repitition<25; repitition++) {
-            //TODO: make arrays maybe, to make it one-liner
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "Tap", "Finger"));
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "/up/down", "Finger"));
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "|-", "Finger"));
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "Check mark", "Finger"));
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "Circle", "Finger"));
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "knuckles", "Knuckle"));
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "knuckles", "Knuckle"));
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "Tap", "Knuckle"));
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "e Knuckle", "Knuckle"));
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "knuckles", "Knuckle"));
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "Mirrored L", "Finger"));
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "S", "Finger"));
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "left/right", "Finger"));
-            taskContDescs.add(new TaskContentDescription("@drawable/browser", "@drawable/browser_menu", "knuckles", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.tap, "Tap", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.twotap, "Two knuckle tap", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe left", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe right", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe up", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe down", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.twoswipeup, "Swipe up with two knuckles", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.twoswipedown, "Swipe down with two knuckles", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.browser, "Circle", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.arrowheadleft, "Arrowhead left", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.arrowheadright, "Arrowhead right", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.checkmark, "Checkmark", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.flashlight, "Γ", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.L, "L", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.Lmirrored, "Mirrored L", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.Screenshot, "S", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.rotate, "Press and rotate knuckle", "Knuckle"));
 
+            fingerTasks.add(new TaskContentDescription(R.drawable.tap, "Tap", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.twotap, "Two finger tap", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe left", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe right", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe up", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe down", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.twoswipeup, "Swipe up with two fingers", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.twoswipedown, "Swipe down with two fingers", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.browser, "Circle", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.arrowheadleft, "Arrowhead left", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.arrowheadright, "Arrowhead right", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.checkmark, "Checkmark", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.flashlight, "Γ", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.L, "L", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.Lmirrored, "Mirrored L", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.Screenshot, "S", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.rotate, "Press and rotate finger", "Finger"));
         }
 
-        // Shuffle until fist task is finger for even, knuckle for odd userIDs
-        boolean fingerFirst = (taskContDescs.get(0).getGestureText().equals("Finger"));
-        while ((!fingerFirst && this.userID%2==0) || (fingerFirst && this.userID%2==1)) {
-            Collections.shuffle(taskContDescs);
-            fingerFirst = (taskContDescs.get(0).getGestureText().equals("Finger"));
-        }
+        Collections.shuffle(fingerTasks);
+        Collections.shuffle(knuckleTasks);
 
+        if (this.userID%2==0) {
+            taskContDescs.addAll(fingerTasks);
+            taskContDescs.addAll(knuckleTasks);
+        } else {
+            taskContDescs.addAll(knuckleTasks);
+            taskContDescs.addAll(fingerTasks);
+        }
         return taskContDescs;
     }
 
@@ -84,6 +109,7 @@ public class TaskActivity extends AppCompatActivity {
         ImageButton button_revert = findViewById(R.id.button_revert);
         final TextView text_inputMethod = (TextView) findViewById(R.id.text_inputMethod);
         final TextView text_gesture = findViewById(R.id.text_gesture);
+        final ImageView image_usecase = findViewById(R.id.image_usecase);
 
         // Initialise taskID, get userID from MainActivity
         taskID = 0;
@@ -95,6 +121,7 @@ public class TaskActivity extends AppCompatActivity {
         TaskContentDescription taskDescription = taskContDescs.remove(0);
         text_inputMethod.setText(taskDescription.getInputMethodText());
         text_gesture.setText(taskDescription.getGestureText());
+        image_usecase.setImageResource(taskDescription.getImage());
 
         versionID = 0;
 
@@ -118,6 +145,7 @@ public class TaskActivity extends AppCompatActivity {
                     TaskContentDescription taskDescription = taskContDescs.remove(0);
                     text_inputMethod.setText(taskDescription.getInputMethodText());
                     text_gesture.setText(taskDescription.getGestureText());
+                    image_usecase.setImageResource(taskDescription.getImage());
                 }
             }
         });

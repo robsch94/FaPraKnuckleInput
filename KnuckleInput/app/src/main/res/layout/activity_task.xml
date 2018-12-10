@@ -48,21 +48,12 @@
         android:text="TextView" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/image_usecase"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="354dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="92dp"
         app:srcCompat="@drawable/browser" />
 
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="256dp"
-        app:srcCompat="@drawable/browser_menu" />
 </RelativeLayout>
