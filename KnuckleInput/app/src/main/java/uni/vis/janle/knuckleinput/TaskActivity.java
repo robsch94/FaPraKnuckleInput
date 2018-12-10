@@ -1,15 +1,14 @@
 package uni.vis.janle.knuckleinput;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.hcilab.libftsp.LocalDeviceHandler;
 import org.hcilab.libftsp.capacitivematrix.capmatrix.CapacitiveImageTS;
@@ -17,75 +16,46 @@ import org.hcilab.libftsp.listeners.LocalCapImgListener;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Collections;
 
 public class TaskActivity extends AppCompatActivity {
     private String TAG = "TaskActivity";
 
     public int versionID;
-    public int userID;
     public int taskID;
+    public TaskContentDescription [] taskContentDescriptions = new TaskContentDescription[20];
     // output stream for capacitive matrix
     private FileOutputStream matrixOutputStream;
 
 
-    private List<TaskContentDescription> setupTask() {
-        List<TaskContentDescription> taskContDescs = new ArrayList<>();
-        List<TaskContentDescription> knuckleTasks = new ArrayList<>();
-        List<TaskContentDescription> fingerTasks = new ArrayList<>();
-        for (int repitition = 0; repitition<25; repitition++) {
-            knuckleTasks.add(new TaskContentDescription(R.drawable.tap, "Tap", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.twotap, "Two knuckle tap", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe left", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe right", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe up", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe down", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.twoswipeup, "Swipe up with two knuckles", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.twoswipedown, "Swipe down with two knuckles", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.browser, "Circle", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.arrowheadleft, "Arrowhead left", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.arrowheadright, "Arrowhead right", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.checkmark, "Checkmark", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.flashlight, "Γ", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.L, "L", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.Lmirrored, "Mirrored L", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.Screenshot, "S", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.rotate, "Press and rotate knuckle", "Knuckle"));
-
-            fingerTasks.add(new TaskContentDescription(R.drawable.tap, "Tap", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.twotap, "Two finger tap", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe left", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe right", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe up", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe down", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.twoswipeup, "Swipe up with two fingers", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.twoswipedown, "Swipe down with two fingers", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.browser, "Circle", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.arrowheadleft, "Arrowhead left", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.arrowheadright, "Arrowhead right", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.checkmark, "Checkmark", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.flashlight, "Γ", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.L, "L", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.Lmirrored, "Mirrored L", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.Screenshot, "S", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.rotate, "Press and rotate finger", "Finger"));
-        }
-
-        Collections.shuffle(fingerTasks);
-        Collections.shuffle(knuckleTasks);
-
-        if (this.userID%2==0) {
-            taskContDescs.addAll(fingerTasks);
-            taskContDescs.addAll(knuckleTasks);
-        } else {
-            taskContDescs.addAll(knuckleTasks);
-            taskContDescs.addAll(fingerTasks);
-        }
-        return taskContDescs;
+    @Override
+    protected void onStop() {
+        /*if (matrixOutputStream != null) {
+            try {
+                matrixOutputStream.flush();
+                matrixOutputStream.close();
+                matrixOutputStream = null;
+                System.out.println("flushed all files");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }*/
+        super.onStop();
     }
 
+    private void setupTask() {
+
+        final String [] topImages = new String[20];
+        final String [] botImages = new String[20];
+        final String [] gestureTexts = new String[20];
+        final String [] inputMethodTexts = new String[20];
+
+        for (int i = 0; i<20; i++) {
+            //taskContentDescriptions[i] = new TaskContentDescription(topImages[i], botImages[i], gestureTexts[i], inputMethodTexts[i]);
+            this.taskContentDescriptions[i] = new TaskContentDescription("@drawable/browser","@drawable/browser_menu" , "Swipe left", "Finger");
+        }
+        // TODO: Create list with every task from all iterations (400*2)
+        // TODO: Shuffle
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,23 +75,23 @@ public class TaskActivity extends AppCompatActivity {
         });
         localDeviceHandler.startHandler();
 
+        setupTask();
+
         ImageButton button_next = findViewById(R.id.button_next);
         ImageButton button_revert = findViewById(R.id.button_revert);
+
         final TextView text_inputMethod = (TextView) findViewById(R.id.text_inputMethod);
+
         final TextView text_gesture = findViewById(R.id.text_gesture);
-        final ImageView image_usecase = findViewById(R.id.image_usecase);
 
-        // Initialise taskID, get userID from MainActivity
+
         taskID = 0;
-        Bundle b = getIntent().getExtras();
-        this.userID = b.getInt("userID");
 
-        // setup TaskContentDescriptions
-        final List<TaskContentDescription> taskContDescs = this.setupTask();
-        TaskContentDescription taskDescription = taskContDescs.remove(0);
-        text_inputMethod.setText(taskDescription.getInputMethodText());
+        TaskContentDescription taskDescription = taskContentDescriptions[0];
+        //text_inputMethod.setText(taskDescription.getInputMethodText());
+        System.out.println(text_inputMethod);
+        text_inputMethod.setText("Hello World!");
         text_gesture.setText(taskDescription.getGestureText());
-        image_usecase.setImageResource(taskDescription.getImage());
 
         versionID = 0;
 
@@ -139,14 +109,9 @@ public class TaskActivity extends AppCompatActivity {
                 versionID = 0;
                 taskID = (taskID + 1) % 20;
 
-                if (taskContDescs.isEmpty()) {
-                    Toast.makeText(getApplicationContext(), "All tasks done!", Toast.LENGTH_SHORT).show();
-                } else {
-                    TaskContentDescription taskDescription = taskContDescs.remove(0);
-                    text_inputMethod.setText(taskDescription.getInputMethodText());
-                    text_gesture.setText(taskDescription.getGestureText());
-                    image_usecase.setImageResource(taskDescription.getImage());
-                }
+                TaskContentDescription taskDescription = taskContentDescriptions[taskID];
+                text_inputMethod.setText(taskDescription.getInputMethodText());
+                text_gesture.setText(taskDescription.getGestureText());
             }
         });
         button_revert.setOnClickListener(new View.OnClickListener() {
@@ -157,13 +122,20 @@ public class TaskActivity extends AppCompatActivity {
             }
         });
 
+
     }
 
     void storeData(CapacitiveImageTS capImg) {
         try {
-            //TODO too slow (currently only 12 samples per second and not 20)
-            //TODO flush at the end (not sure, if a problem)
-            matrixOutputStream.write((capImg.toString() + "\n").getBytes());
+            //TODO to slow (currently only 12 samples per second and not 20)
+            //TODO flush at the end (not shure, if a problem)
+            if (matrixOutputStream != null){
+                matrixOutputStream.write((String.valueOf(System.currentTimeMillis()) + ";" + capImg.toString() + "\n").getBytes());
+                matrixOutputStream.flush();
+                //System.out.println(System.currentTimeMillis());
+            } else {
+                System.out.println("CapImg stream is null!");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
