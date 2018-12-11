@@ -38,13 +38,13 @@ public class TaskActivity extends AppCompatActivity {
         for (int repitition = 0; repitition<25; repitition++) {
             knuckleTasks.add(new TaskContentDescription(R.drawable.tap, "Tap", "Knuckle"));
             knuckleTasks.add(new TaskContentDescription(R.drawable.twotap, "Two knuckle tap", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe left", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe right", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe up", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe down", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.swipeleft, "Swipe left", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.swiperight, "Swipe right", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.swipeup, "Swipe up", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.swipedown, "Swipe down", "Knuckle"));
             knuckleTasks.add(new TaskContentDescription(R.drawable.twoswipeup, "Swipe up with two knuckles", "Knuckle"));
             knuckleTasks.add(new TaskContentDescription(R.drawable.twoswipedown, "Swipe down with two knuckles", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(R.drawable.browser, "Circle", "Knuckle"));
+            knuckleTasks.add(new TaskContentDescription(R.drawable.circle, "Circle", "Knuckle"));
             knuckleTasks.add(new TaskContentDescription(R.drawable.arrowheadleft, "Arrowhead left", "Knuckle"));
             knuckleTasks.add(new TaskContentDescription(R.drawable.arrowheadright, "Arrowhead right", "Knuckle"));
             knuckleTasks.add(new TaskContentDescription(R.drawable.checkmark, "Checkmark", "Knuckle"));
@@ -56,13 +56,13 @@ public class TaskActivity extends AppCompatActivity {
 
             fingerTasks.add(new TaskContentDescription(R.drawable.tap, "Tap", "Finger"));
             fingerTasks.add(new TaskContentDescription(R.drawable.twotap, "Two finger tap", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe left", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe right", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe up", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.swipe, "Swipe down", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.swipeleft, "Swipe left", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.swiperight, "Swipe right", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.swipeup, "Swipe up", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.swipedown, "Swipe down", "Finger"));
             fingerTasks.add(new TaskContentDescription(R.drawable.twoswipeup, "Swipe up with two fingers", "Finger"));
             fingerTasks.add(new TaskContentDescription(R.drawable.twoswipedown, "Swipe down with two fingers", "Finger"));
-            fingerTasks.add(new TaskContentDescription(R.drawable.browser, "Circle", "Finger"));
+            fingerTasks.add(new TaskContentDescription(R.drawable.circle, "Circle", "Finger"));
             fingerTasks.add(new TaskContentDescription(R.drawable.arrowheadleft, "Arrowhead left", "Finger"));
             fingerTasks.add(new TaskContentDescription(R.drawable.arrowheadright, "Arrowhead right", "Finger"));
             fingerTasks.add(new TaskContentDescription(R.drawable.checkmark, "Checkmark", "Finger"));
