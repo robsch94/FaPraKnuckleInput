@@ -38,55 +38,64 @@
         android:layout_marginTop="100dp"
         android:indeterminate="false"
         android:max="425"
-        android:minHeight="50dp"
         android:minWidth="200dp"
+        android:minHeight="50dp"
         android:progress="1" />
 
     <TextView
         android:id="@+id/text_progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
+        android:layout_above="@id/image_usecase"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginEnd="13dp"
+        android:layout_alignParentEnd="true"
         android:layout_marginTop="116dp"
-        android:gravity="center"
+        android:layout_marginEnd="13dp"
         android:text="1/425"
         android:textSize="14dp" />
 
     <LinearLayout
+        android:id="@+id/linear"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true">
+        android:layout_height="wrap_content"
+        android:layout_above="@id/image_usecase"
+        android:layout_below="@+id/text_gesture"
+        android:layout_marginTop="58dp"
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/text_before"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/text_gesture"
-            android:layout_toStartOf="@+id/text_inputMethod"
-            android:gravity="center"
-            android:text="TextView"
+            android:layout_weight="1"
+            android:layout_marginLeft="10dp"
+            android:gravity="left"
+            android:text="Before"
             android:textSize="24dp" />
+
 
         <TextView
             android:id="@+id/text_after"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/text_gesture"
-            android:layout_toEndOf="@+id/text_inputMethod"
-            android:gravity="center"
-            android:text="TextView"
+            android:layout_weight="1"
+            android:layout_marginRight="10dp"
+            android:gravity="right"
+            android:text="After"
             android:textSize="24dp" />
     </LinearLayout>
 
+
     <ImageView
         android:id="@+id/image_usecase"
-        android:layout_width="match_parent"
-        android:layout_height="354dp"
-        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content"
+        android:layout_height="300dp"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="100dp" />
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="160dp"
+        app:srcCompat="@drawable/circle" />
+
 
 </RelativeLayout>

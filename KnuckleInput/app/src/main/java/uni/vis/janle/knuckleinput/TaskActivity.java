@@ -31,10 +31,10 @@ import java.util.Collections;
 public class TaskActivity extends AppCompatActivity {
     private String TAG = "TaskActivity";
 
-    public int[] versionIDs = new int[34];  // distuingishes the version (how often the current task appeared yet)
-    public int repititionID;  // distuingishes the repititions (how often a task is repeated)
+    public int[] versionIDs = new int[34];  // distuingishes the version (how often the current task appeared yet), index is taskID
+    public int repititionID;  // revertButton
     public int userID;
-    public int taskID;        // distuingishes the task (e.g. tap with finger))
+    public int taskID;        // 0-16 finger tasks, 18-33 knuckel tasks
     // output stream for capacitive matrix
     private FileOutputStream matrixOutputStream;
     private DatagramSocket udp_sock;
@@ -201,6 +201,7 @@ public class TaskActivity extends AppCompatActivity {
 
     }
 
+
     private void hideSystemUI() {
         // Enables regular immersive mode.
         // For "lean back" mode, remove SYSTEM_UI_FLAG_IMMERSIVE.
@@ -233,7 +234,7 @@ public class TaskActivity extends AppCompatActivity {
                 //System.out.println(System.currentTimeMillis());
 
                 // send via udp
-                DatagramPacket packet = new DatagramPacket(result.getBytes(), result.getBytes().length, InetAddress.getByName("192.168.0.101"), 1234);
+                DatagramPacket packet = new DatagramPacket(result.getBytes(), result.getBytes().length, InetAddress.getByName("192.168.0.100"), 1234);
                 if (udp_sock != null){
                     udp_sock.send(packet);
                     System.out.println("sent data to pc");
