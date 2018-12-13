@@ -69,11 +69,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
 
     public void startTask(View view) {
         Intent intent = new Intent(this, TaskActivity.class);
-        intent.putExtra("userID",((EditText)findViewById(R.id.id_input)).getText());
+        intent.putExtra("userID",((EditText)findViewById(R.id.id_input)).getText().toString());
         startActivity(intent);
     }
 }
