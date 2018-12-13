@@ -109,7 +109,7 @@ public class TaskActivity extends AppCompatActivity {
         localDeviceHandler.setLocalCapImgListener(new LocalCapImgListener() {
             @Override
             public void onLocalCapImg(final CapacitiveImageTS capImg) { // called approximately every 50ms
-                //storeData(capImg);
+                storeData(capImg);
             }
         });
         localDeviceHandler.startHandler();
@@ -205,9 +205,15 @@ public class TaskActivity extends AppCompatActivity {
 
     void storeData(CapacitiveImageTS capImg) {
         try {
-            //TODO too slow (currently only 12 samples per second and not 20)
-            //TODO flush at the end (not sure, if a problem)
-            matrixOutputStream.write((capImg.toString() + "\n").getBytes());
+            //TODO to slow (currently only 12 samples per second and not 20)
+            //TODO flush at the end (not shure, if a problem)
+            if (matrixOutputStream != null){
+                matrixOutputStream.write((String.valueOf(System.currentTimeMillis()) + ";" + capImg.toString() + "\n").getBytes());
+                matrixOutputStream.flush();
+                //System.out.println(System.currentTimeMillis());
+            } else {
+                System.out.println("CapImg stream is null!");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
