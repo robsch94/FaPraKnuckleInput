@@ -1,14 +1,14 @@
 package uni.vis.janle.knuckleinput;
 
-import android.arch.lifecycle.ViewModelProvider;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,77 +30,84 @@ import java.util.Collections;
 
 public class TaskActivity extends AppCompatActivity {
     private String TAG = "TaskActivity";
-    
+
     public int[] versionIDs = new int[34];  // distuingishes the version (how often the current task appeared yet), index is taskID
     public int repititionID;  // revertButton
-    public List<TaskContentDescription> taskContDescs;
+    public List<TaskContentDescription> taskContDescs = new ArrayList<>();
+    public int taskContDescsSize;
     public boolean actualData;
     public int userID;
     public int taskID;        // 0-16 finger tasks, 18-33 knuckel tasks
     // output stream for capacitive matrix
     private FileOutputStream matrixOutputStream;
     private DatagramSocket udp_sock;
+    private boolean isPause = false;
+    private boolean isTutorial = false;
 
     // GUI
-    final TextView text_inputMethod = (TextView) findViewById(R.id.text_inputMethod);
-    final TextView text_gesture = findViewById(R.id.text_gesture);
-    final ImageView image_usecase = findViewById(R.id.image_usecase);
-    final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
-    final TextView text_progressBar = findViewById(R.id.text_progressBar);
+    TextView text_inputMethod = null;
+    TextView text_gesture = null;
+    TextView text_before = null;
+    TextView text_after = null;
+    ImageView image_usecase = null;
+    ProgressBar progressBar = null;
+    TextView text_progressBar = null;
 
-    private List<TaskContentDescription> setupTasks() {
-        List<TaskContentDescription> taskContDescs = new ArrayList<>();
+
+    private static final int UDP_SERVER_PORT = 1234;
+    private static final int MAX_UDP_DATAGRAM_LEN = 1500;
+    private String receivedUDP;
+
+
+    private void setupTutorial() {
+        // Initialise taskID, get userID from MainActivity
+        actualData = false;
+        taskID = 0;
+        isTutorial = true;
+
+        // setup TaskContentDescriptions
+        List<TaskContentDescription> tasks = new ArrayList<>();
+        tasks.addAll(Constants.getFingerTasks());
+        tasks.addAll(Constants.getKnuckleTasks());
+        taskContDescsSize = tasks.size();
+        this.taskContDescs = tasks;
+        Log.i("taskContDescs", String.valueOf(this.taskContDescs.size()));
+        progressBar.setProgress(0);
+        progressBar.setMax(taskContDescsSize);
+
+        // Get first TaskContenDescription
+        nextTask();
+    }
+
+
+    private void setupTasks() {
+        actualData = true;
+        taskID = 0;
+        isTutorial = false;
+
         List<TaskContentDescription> knuckleTasks = new ArrayList<>();
         List<TaskContentDescription> fingerTasks = new ArrayList<>();
-        for (int version = 1; version<=25; version++) {
-            knuckleTasks.add(new TaskContentDescription(0, R.drawable.tap, "Tap", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(1, R.drawable.twotap, "Two knuckle tap", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(2, R.drawable.swipeleft, "Swipe left", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(3, R.drawable.swiperight, "Swipe right", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(4, R.drawable.swipeup, "Swipe up", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(5, R.drawable.swipedown, "Swipe down", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(6, R.drawable.twoswipeup, "Swipe up with two knuckles", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(7, R.drawable.twoswipedown, "Swipe down with two knuckles", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(8, R.drawable.circle, "Circle", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(9, R.drawable.arrowheadleft, "Arrowhead left", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(10, R.drawable.arrowheadright, "Arrowhead right", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(11, R.drawable.checkmark, "Checkmark", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(12, R.drawable.flashlight, "Γ", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(13, R.drawable.l, "L", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(14, R.drawable.lmirrored, "Mirrored L", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(15, R.drawable.screenshot, "S", "Knuckle"));
-            knuckleTasks.add(new TaskContentDescription(16, R.drawable.rotate, "Press and rotate knuckle", "Knuckle"));
-
-            fingerTasks.add(new TaskContentDescription(17, R.drawable.tap, "Tap", "Finger"));
-            fingerTasks.add(new TaskContentDescription(18, R.drawable.twotap, "Two finger tap", "Finger"));
-            fingerTasks.add(new TaskContentDescription(19, R.drawable.swipeleft, "Swipe left", "Finger"));
-            fingerTasks.add(new TaskContentDescription(20, R.drawable.swiperight, "Swipe right", "Finger"));
-            fingerTasks.add(new TaskContentDescription(21, R.drawable.swipeup, "Swipe up", "Finger"));
-            fingerTasks.add(new TaskContentDescription(22, R.drawable.swipedown, "Swipe down", "Finger"));
-            fingerTasks.add(new TaskContentDescription(23, R.drawable.twoswipeup, "Swipe up with two fingers", "Finger"));
-            fingerTasks.add(new TaskContentDescription(24, R.drawable.twoswipedown, "Swipe down with two fingers", "Finger"));
-            fingerTasks.add(new TaskContentDescription(25, R.drawable.circle, "Circle", "Finger"));
-            fingerTasks.add(new TaskContentDescription(26, R.drawable.arrowheadleft, "Arrowhead left", "Finger"));
-            fingerTasks.add(new TaskContentDescription(27, R.drawable.arrowheadright, "Arrowhead right", "Finger"));
-            fingerTasks.add(new TaskContentDescription(28, R.drawable.checkmark, "Checkmark", "Finger"));
-            fingerTasks.add(new TaskContentDescription(29, R.drawable.flashlight, "Γ", "Finger"));
-            fingerTasks.add(new TaskContentDescription(30, R.drawable.l, "L", "Finger"));
-            fingerTasks.add(new TaskContentDescription(31, R.drawable.lmirrored, "Mirrored L", "Finger"));
-            fingerTasks.add(new TaskContentDescription(32, R.drawable.screenshot, "S", "Finger"));
-            fingerTasks.add(new TaskContentDescription(33, R.drawable.rotate, "Press and rotate finger", "Finger"));
+        for (int version = 1; version <= 1; version++) {
+            knuckleTasks.addAll(Constants.getKnuckleTasks());
+            fingerTasks.addAll(Constants.getFingerTasks());
         }
+        taskContDescsSize = knuckleTasks.size() + fingerTasks.size();
 
         Collections.shuffle(fingerTasks);
         Collections.shuffle(knuckleTasks);
 
-        if (this.userID%2==0) {
-            taskContDescs.addAll(fingerTasks);
-            taskContDescs.addAll(knuckleTasks);
+        if (this.userID % 2 == 0) {
+            this.taskContDescs.addAll(fingerTasks);
+            this.taskContDescs.addAll(knuckleTasks);
         } else {
-            taskContDescs.addAll(knuckleTasks);
-            taskContDescs.addAll(fingerTasks);
+            this.taskContDescs.addAll(knuckleTasks);
+            this.taskContDescs.addAll(fingerTasks);
         }
-        return taskContDescs;
+
+        progressBar.setProgress(0);
+        progressBar.setMax(taskContDescsSize);
+
+        nextTask();
     }
 
     @Override
@@ -120,7 +127,7 @@ public class TaskActivity extends AppCompatActivity {
             e.printStackTrace();
             udp_sock = null;
         }
-
+        runUdpServer();
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -138,22 +145,18 @@ public class TaskActivity extends AppCompatActivity {
         localDeviceHandler.startHandler();
         hideSystemUI();
 
-        // Initialise taskID, get userID from MainActivity
-        actualData = true;
-        taskID = 0;
+        // Init GUI
+        text_inputMethod = (TextView) findViewById(R.id.text_inputMethod);
+        text_gesture = findViewById(R.id.text_gesture);
+        image_usecase = findViewById(R.id.image_usecase);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        text_progressBar = findViewById(R.id.text_progressBar);
+        text_before = findViewById(R.id.text_before);
+        text_after = findViewById(R.id.text_after);
+
         Bundle b = getIntent().getExtras();
         String id_string = b.getString("userID");
         this.userID = Integer.valueOf(id_string);
-        Log.i(TAG, "userID:"+String.valueOf(userID));
-
-        // setup TaskContentDescriptions
-        this.taskContDescs = this.setupTasks();
-        TaskContentDescription taskDescription = this.taskContDescs.remove(0);
-        text_inputMethod.setText(taskDescription.getInputMethodText());
-        text_gesture.setText(taskDescription.getGestureText());
-        image_usecase.setImageResource(taskDescription.getImage());
-        taskID = taskDescription.getID();
-        versionIDs[taskID]++;
 
         //create file output for capacitive matrix
         try {
@@ -161,56 +164,43 @@ public class TaskActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        setupTutorial();
     }
 
     private void nextTask() {
+        String last_inputMethod = text_inputMethod.getText().toString();
+        Log.i("last_inputMethod", last_inputMethod);
+
         repititionID = 0;
-        if (taskContDescs.size() == 425 && image_usecase.getAlpha() == 1.0) {
-            actualData = false;
-            image_usecase.setAlpha(1.0f);
-            text_inputMethod.setText("");
-            text_gesture.setText("Pause");
-            progressBar.setAlpha(1.0f);
-            text_progressBar.setAlpha(1.0f);
-            // Pause screen
-        } else if (this.taskContDescs.isEmpty()) {
-            // All tasks done
-            actualData = false;
-            Toast.makeText(getApplicationContext(), "All tasks done!", Toast.LENGTH_SHORT).show();
+        if (this.taskContDescs.isEmpty() && !isPause) {
+            // Pause screen between tutorial and study OR All tasks done
+            isPause = true;
+            pauseScreen();
+            if (isTutorial) {
+                setupTasks();
+            } else {
+                Toast.makeText(getApplicationContext(), "All tasks done!", Toast.LENGTH_SHORT).show();
+            }
+        } else if (this.taskContDescs.isEmpty() && isPause) {
+            isPause = false;
+            endPauseScreen();
+            createNextTask();
+        } else if (!last_inputMethod.equals(this.taskContDescs.get(0).getInputMethodText()) && !isPause && !last_inputMethod.equals("TextView")) {
+            // Pause screen between finger and knuckle tasks
+            isPause = true;
+            pauseScreen();
+        } else if (!last_inputMethod.equals(this.taskContDescs.get(0).getInputMethodText()) && isPause && !last_inputMethod.equals("TextView")) {
+            // Goto next task from pause screen
+            isPause = false;
+            endPauseScreen();
+            createNextTask();
         } else {
             // Next task
-            actualData = true;
-            TaskContentDescription taskDescription = taskContDescs.remove(0);
-            text_inputMethod.setText(taskDescription.getInputMethodText());
-            taskID = taskDescription.getID();
-            versionIDs[taskID]++;
-            text_gesture.setText(taskDescription.getGestureText());
-            image_usecase.setAlpha(0.0f);
-            image_usecase.setImageResource(taskDescription.getImage());
-            progressBar.setAlpha(0.0f);
-            text_progressBar.setAlpha(0.0f);
-
-            if (progressBar.getProgress() == 425) {
-                progressBar.setProgress(1);
-
-            } else {
-                progressBar.setProgress(progressBar.getProgress() + 1);
-            }
-            text_progressBar.setText(String.valueOf(progressBar.getProgress()) + "/425");
-            // Send content
-            /*
-            Data to send:
-                - userID
-                - timestamp
-                - touch (bool)
-                - gestureID
-                - versionID
-                - inputMethod (finger/knuckle)
-                - actualData (bool)
-                - capacitiveImage (Matrix)
-             */
+            createNextTask();
         }
     }
+
 
     private void revertTask() {
         repititionID++;
@@ -237,7 +227,7 @@ public class TaskActivity extends AppCompatActivity {
     void storeData(CapacitiveImageTS capImg) {
         try {
             //TODO flush at the end (not shure, if a problem)
-            if (matrixOutputStream != null){
+            if (matrixOutputStream != null) {
                 String result = "";
                 result += String.valueOf(userID);
                 result += ";" + String.valueOf(System.currentTimeMillis());
@@ -249,10 +239,10 @@ public class TaskActivity extends AppCompatActivity {
                 //System.out.println(System.currentTimeMillis());
 
                 // send via udp
-                DatagramPacket packet = new DatagramPacket(result.getBytes(), result.getBytes().length, InetAddress.getByName("192.168.0.100"), 1234);
-                if (udp_sock != null){
+                DatagramPacket packet = new DatagramPacket(result.getBytes(), result.getBytes().length, InetAddress.getByName("192.168.0.100"), UDP_SERVER_PORT);
+                if (udp_sock != null) {
                     udp_sock.send(packet);
-                    System.out.println("sent data to pc");
+                    //System.out.println("sent data to pc");
                 } else {
                     System.out.println("udp socket is null");
                 }
@@ -262,6 +252,104 @@ public class TaskActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void runUdpServer() {
+        new Thread(new Runnable() {
+            public void run() {
+                String lText;
+                byte[] lMsg = new byte[MAX_UDP_DATAGRAM_LEN];
+                try {
+
+                    byte[] buffer = new byte[2048];
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                    DatagramSocket dsocket = new DatagramSocket(UDP_SERVER_PORT);
+                    while (true) {
+
+                        dsocket.receive(packet);
+                        lText = new String(buffer, 0, packet.getLength());
+                        Log.i("UDP packet received", lText);
+                        if (lText.equals("next")) {
+                            Handler mainHandler = new Handler(Looper.getMainLooper());
+
+                            Runnable myRunnable = new Runnable() {
+                                @Override
+                                public void run() {nextTask();} // This is your code
+                            };
+                            mainHandler.post(myRunnable);
+                        } else if (lText.equals("revert")) {
+                            revertTask();
+                        }
+                        Thread.sleep(200);
+
+
+                        packet.setLength(buffer.length);
+                    }
+                } catch (Exception e) {
+                    System.err.println(e);
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+    }
+
+    private void pauseScreen() {
+        actualData = false;
+        image_usecase.setAlpha(0.0f);
+        text_inputMethod.setText("");
+        text_gesture.setText("Pause");
+        progressBar.setAlpha(0.0f);
+        text_progressBar.setAlpha(0.0f);
+        text_before.setAlpha(0.0f);
+        text_after.setAlpha(0.0f);
+    }
+
+    private void endPauseScreen() {
+        actualData = !isTutorial;
+        image_usecase.setAlpha(1.0f);
+        text_inputMethod.setText("");
+        text_gesture.setText("");
+        progressBar.setAlpha(1.0f);
+        text_progressBar.setAlpha(1.0f);
+        text_before.setAlpha(1.0f);
+        text_after.setAlpha(1.0f);
+    }
+
+    private void createNextTask() {
+        Log.i("next", "else next task");
+        TaskContentDescription taskDescription = this.taskContDescs.remove(0);
+        // TODO: Maybe put this in a method
+        text_inputMethod.setText(taskDescription.getInputMethodText());
+        text_gesture.setText(taskDescription.getGestureText());
+        image_usecase.setImageResource(taskDescription.getImage());
+        taskID = taskDescription.getID();
+        versionIDs[taskID]++;
+
+        text_inputMethod.setText(taskDescription.getInputMethodText());
+        taskID = taskDescription.getID();
+        versionIDs[taskID]++;
+        text_gesture.setText(taskDescription.getGestureText());
+        image_usecase.setImageResource(taskDescription.getImage());
+
+        if (progressBar.getProgress() == taskContDescsSize) {
+            progressBar.setProgress(0);
+        } else {
+            progressBar.setProgress(progressBar.getProgress() + 1);
+        }
+        text_progressBar.setText(String.valueOf(progressBar.getProgress()) + "/"+String.valueOf(taskContDescsSize));
+        // Send content
+            /*
+            Data to send:
+                - userID
+                - timestamp
+                - touch (bool)
+                - gestureID
+                - versionID
+                - inputMethod (finger/knuckle)
+                - actualData (bool)
+                - capacitiveImage (Matrix)
+             */
     }
 
 }
