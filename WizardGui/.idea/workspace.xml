@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="99b47aa1-e5b3-4e21-aae7-0bb54833e925" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../KnuckleInput/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../KnuckleInput/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../KnuckleInput/app/src/main/java/uni/vis/janle/knuckleinput/TaskActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../KnuckleInput/app/src/main/java/uni/vis/janle/knuckleinput/TaskActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../KnuckleInput/app/src/main/res/layout/activity_task.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../KnuckleInput/app/src/main/res/layout/activity_task.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

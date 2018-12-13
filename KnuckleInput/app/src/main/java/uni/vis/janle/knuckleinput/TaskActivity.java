@@ -30,15 +30,23 @@ import java.util.Collections;
 
 public class TaskActivity extends AppCompatActivity {
     private String TAG = "TaskActivity";
-
+    
     public int[] versionIDs = new int[34];  // distuingishes the version (how often the current task appeared yet), index is taskID
     public int repititionID;  // revertButton
+    public List<TaskContentDescription> taskContDescs;
+    public boolean actualData;
     public int userID;
     public int taskID;        // 0-16 finger tasks, 18-33 knuckel tasks
     // output stream for capacitive matrix
     private FileOutputStream matrixOutputStream;
     private DatagramSocket udp_sock;
 
+    // GUI
+    final TextView text_inputMethod = (TextView) findViewById(R.id.text_inputMethod);
+    final TextView text_gesture = findViewById(R.id.text_gesture);
+    final ImageView image_usecase = findViewById(R.id.image_usecase);
+    final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
+    final TextView text_progressBar = findViewById(R.id.text_progressBar);
 
     private List<TaskContentDescription> setupTasks() {
         List<TaskContentDescription> taskContDescs = new ArrayList<>();
@@ -130,16 +138,8 @@ public class TaskActivity extends AppCompatActivity {
         localDeviceHandler.startHandler();
         hideSystemUI();
 
-        // Views
-        //ImageButton button_next = findViewById(R.id.button_next);
-        //ImageButton button_revert = findViewById(R.id.button_revert);
-        final TextView text_inputMethod = (TextView) findViewById(R.id.text_inputMethod);
-        final TextView text_gesture = findViewById(R.id.text_gesture);
-        final ImageView image_usecase = findViewById(R.id.image_usecase);
-        final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        final TextView text_progressBar = findViewById(R.id.text_progressBar);
-
         // Initialise taskID, get userID from MainActivity
+        actualData = true;
         taskID = 0;
         Bundle b = getIntent().getExtras();
         String id_string = b.getString("userID");
@@ -147,8 +147,8 @@ public class TaskActivity extends AppCompatActivity {
         Log.i(TAG, "userID:"+String.valueOf(userID));
 
         // setup TaskContentDescriptions
-        final List<TaskContentDescription> taskContDescs = this.setupTasks();
-        TaskContentDescription taskDescription = taskContDescs.remove(0);
+        this.taskContDescs = this.setupTasks();
+        TaskContentDescription taskDescription = this.taskContDescs.remove(0);
         text_inputMethod.setText(taskDescription.getInputMethodText());
         text_gesture.setText(taskDescription.getGestureText());
         image_usecase.setImageResource(taskDescription.getImage());
@@ -161,44 +161,59 @@ public class TaskActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
-        /*
-        button_next.setOnClickListener(new View.OnClickListener() {
+    private void nextTask() {
+        repititionID = 0;
+        if (taskContDescs.size() == 425 && image_usecase.getAlpha() == 1.0) {
+            actualData = false;
+            image_usecase.setAlpha(1.0f);
+            text_inputMethod.setText("");
+            text_gesture.setText("Pause");
+            progressBar.setAlpha(1.0f);
+            text_progressBar.setAlpha(1.0f);
+            // Pause screen
+        } else if (this.taskContDescs.isEmpty()) {
+            // All tasks done
+            actualData = false;
+            Toast.makeText(getApplicationContext(), "All tasks done!", Toast.LENGTH_SHORT).show();
+        } else {
+            // Next task
+            actualData = true;
+            TaskContentDescription taskDescription = taskContDescs.remove(0);
+            text_inputMethod.setText(taskDescription.getInputMethodText());
+            taskID = taskDescription.getID();
+            versionIDs[taskID]++;
+            text_gesture.setText(taskDescription.getGestureText());
+            image_usecase.setAlpha(0.0f);
+            image_usecase.setImageResource(taskDescription.getImage());
+            progressBar.setAlpha(0.0f);
+            text_progressBar.setAlpha(0.0f);
 
-            @Override
-            public void onClick(View v) {
-                repititionID = 0;
-                //TODO: Save versionID for each gesture!! Right now always 0
-                //TODO: Set view between knuckle and finger gestures
+            if (progressBar.getProgress() == 425) {
+                progressBar.setProgress(1);
 
-                if (taskContDescs.isEmpty()) {
-                    Toast.makeText(getApplicationContext(), "All tasks done!", Toast.LENGTH_SHORT).show();
-                } else {
-                    TaskContentDescription taskDescription = taskContDescs.remove(0);
-                    text_inputMethod.setText(taskDescription.getInputMethodText());
-                    taskID = taskDescription.getId();
-                    versionIDs[taskID]++;
-                    text_gesture.setText(taskDescription.getGestureText());
-                    image_usecase.setImageResource(taskDescription.getImage());
-                    if (progressBar.getProgress()==425) {
-                        progressBar.setProgress(1);
-
-                    } else {
-                        progressBar.setProgress(progressBar.getProgress()+1);
-                    }
-                    text_progressBar.setText(String.valueOf(progressBar.getProgress())+"/425");
-                }
+            } else {
+                progressBar.setProgress(progressBar.getProgress() + 1);
             }
-        });
-        button_revert.setOnClickListener(new View.OnClickListener() {
+            text_progressBar.setText(String.valueOf(progressBar.getProgress()) + "/425");
+            // Send content
+            /*
+            Data to send:
+                - userID
+                - timestamp
+                - touch (bool)
+                - gestureID
+                - versionID
+                - inputMethod (finger/knuckle)
+                - actualData (bool)
+                - capacitiveImage (Matrix)
+             */
+        }
+    }
 
-            @Override
-            public void onClick(View v) {
-                repititionID++;
-            }
-        });
-        */
-
+    private void revertTask() {
+        repititionID++;
     }
 
 
