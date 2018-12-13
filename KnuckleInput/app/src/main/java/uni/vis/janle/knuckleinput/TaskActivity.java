@@ -1,5 +1,6 @@
 package uni.vis.janle.knuckleinput;
 
+import android.arch.lifecycle.ViewModelProvider;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +20,10 @@ import org.hcilab.libftsp.listeners.LocalCapImgListener;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
@@ -32,6 +37,7 @@ public class TaskActivity extends AppCompatActivity {
     public int taskID;        // distuingishes the task (e.g. tap with finger))
     // output stream for capacitive matrix
     private FileOutputStream matrixOutputStream;
+    private DatagramSocket udp_sock;
 
 
     private List<TaskContentDescription> setupTasks() {
@@ -98,6 +104,15 @@ public class TaskActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // udp socket
+        try {
+            udp_sock = new DatagramSocket();
+        } catch (SocketException e) {
+            e.printStackTrace();
+            udp_sock = null;
+        }
+
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -205,12 +220,26 @@ public class TaskActivity extends AppCompatActivity {
 
     void storeData(CapacitiveImageTS capImg) {
         try {
-            //TODO to slow (currently only 12 samples per second and not 20)
             //TODO flush at the end (not shure, if a problem)
             if (matrixOutputStream != null){
-                matrixOutputStream.write((String.valueOf(System.currentTimeMillis()) + ";" + capImg.toString() + "\n").getBytes());
-                matrixOutputStream.flush();
+                String result = "";
+                result += String.valueOf(userID);
+                result += ";" + String.valueOf(System.currentTimeMillis());
+                result += ";" + String.valueOf(taskID);
+                result += ";" + String.valueOf(repititionID);
+                result += ";" + capImg.toString();
+                matrixOutputStream.write((result + "\n").getBytes());
+                //matrixOutputStream.flush();
                 //System.out.println(System.currentTimeMillis());
+
+                // send via udp
+                DatagramPacket packet = new DatagramPacket(result.getBytes(), result.getBytes().length, InetAddress.getByName("192.168.0.101"), 1234);
+                if (udp_sock != null){
+                    udp_sock.send(packet);
+                    System.out.println("sent data to pc");
+                } else {
+                    System.out.println("udp socket is null");
+                }
             } else {
                 System.out.println("CapImg stream is null!");
             }
