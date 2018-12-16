@@ -12,7 +12,7 @@ class Starter(QObject):
     PHONE_IP = "192.168.0.102"
     PHONE_PORT = 1234
     cap_sig = pyqtSignal(str)
-
+    
     def __init__(self):
         super().__init__()
         self.app = QtWidgets.QApplication(sys.argv)
@@ -39,12 +39,20 @@ class Starter(QObject):
         self.img_view.ui.roiBtn.hide()
         self.img_view.ui.menuBtn.hide()
 
+        self.ui.centralwidget.keyPressEvent = self.keyPressEvent
+
         self.com_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.udp_thread = UdpThread(self)
         self.udp_thread.start()
         self.cap_sig.connect(self.__received_data)
         self.ui.next_btn.clicked.connect(self.__send_next)
         self.ui.revert_btn.clicked.connect(self.__send_revert)
+
+    def keyPressEvent(self, event):
+        if not event.isAutoRepeat():
+            print(event.key())
+            if event.key() == QtCore.Qt.Key_Space:
+                print("space")
 
     def __send_next(self):
         self.com_sock.sendto("next".encode("UTF-8"), (Starter.PHONE_IP, Starter.PHONE_PORT))
