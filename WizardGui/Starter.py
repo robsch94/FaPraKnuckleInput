@@ -50,9 +50,11 @@ class Starter(QObject):
 
     def keyPressEvent(self, event):
         if not event.isAutoRepeat():
-            print(event.key())
-            if event.key() == QtCore.Qt.Key_Space:
-                print("space")
+            if event.key() == QtCore.Qt.Key_R:
+                self.__send_next()
+            elif event.key() == QtCore.Qt.Key_N:
+                self.__send_revert()
+
 
     def __send_next(self):
         self.com_sock.sendto("next".encode("UTF-8"), (Starter.PHONE_IP, Starter.PHONE_PORT))
