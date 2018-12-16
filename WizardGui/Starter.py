@@ -25,6 +25,11 @@ class Starter(QObject):
 
     def __received_data(self, data):
         try:
+            task_id = data.split(";")[1]
+            cur_index = data.split(";")[2]
+            self.ui.input_lbl.setText(self.match_tasks(task_id))
+            self.ui.progress_lbl.setText("%s/420" % cur_index)
+
             img = np.array(data.split(";")[-1].split(",")[2:-1], dtype=np.float64)
             img[img < 0] = 0
             img = img.reshape(27, 15).transpose()
@@ -62,6 +67,44 @@ class Starter(QObject):
     def __send_revert(self):
         self.com_sock.sendto("revert".encode("UTF-8"), (Starter.PHONE_IP, Starter.PHONE_PORT))
 
+    def match_tasks(self, task_id):
+        return { "0": "Finger Tap",
+                "1": "Finger TwoTap",
+                "2": "Finger SwipeLeft",
+                "3": "Finger SwipeRight",
+                "4": "Finger SwipeUp",
+                "5": "Finger SwipeDown",
+                "6": "Finger TwoSwipeUp",
+                "7": "Finger TwoSwipeDown",
+                "8": "Finger Circle",
+                "9": "Finger ArrowheadLeft",
+                "10": "Finger ArrowheadRight",
+                "11": "Finger Checkmark",
+                "12": "Finger Flashlight",
+                "13": "Finger L",
+                "14": "Finger LMirrored",
+                "15": "Finger Screenshot",
+                "16": "Finger Rotate",
+                "17": "Knuckle Tap",
+                "18": "Knuckle TwoTap",
+                "19": "Knuckle SwipeLeft",
+                "20": "Knuckle SwipeRight",
+                "21": "Knuckle SwipeUp",
+                "22": "Knuckle SwipeDown",
+                "23": "Knuckle TwoSwipeUp",
+                "24": "Knuckle TwoSwipeDown",
+                "25": "Knuckle Circle",
+                "26": "Knuckle ArrowheadLeft",
+                "27": "Knuckle ArrowheadRight",
+                "28": "Knuckle Checkmark",
+                "29": "Knuckle Flashlight",
+                "30": "Knuckle L",
+                "31": "Knuckle LMirrored",
+                "32": "Knuckle Screenshot",
+                "33": "Knuckle Rotate"
+        }[task_id]
+
+        
 class UdpThread(QThread):
 
     def __init__(self, main):
