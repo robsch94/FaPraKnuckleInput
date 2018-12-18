@@ -44,6 +44,7 @@ public class TaskActivity extends AppCompatActivity {
     private DatagramSocket udp_sock;
     private boolean isPause = false;
     private boolean isTutorial = false;
+    private boolean isEnd = false;
 
     // GUI
     TextView text_inputMethod = null;
@@ -88,7 +89,7 @@ public class TaskActivity extends AppCompatActivity {
 
         List<TaskContentDescription> knuckleTasks = new ArrayList<>();
         List<TaskContentDescription> fingerTasks = new ArrayList<>();
-        for (int version = 1; version <= 1; version++) {
+        for (int version = 1; version <= 20; version++) {
             knuckleTasks.addAll(Constants.getKnuckleTasks());
             fingerTasks.addAll(Constants.getFingerTasks());
         }
@@ -175,47 +176,51 @@ public class TaskActivity extends AppCompatActivity {
     private void nextTask() {
         String last_inputMethod = text_inputMethod.getText().toString();
         Log.i("last_inputMethod", last_inputMethod);
-
-        if (this.taskContDescs.isEmpty() && !isPause) {
-            // Pause screen between tutorial and study OR All tasks done
-            isPause = true;
-            if (isTutorial) {
-                pauseScreen((userID % 2 == 0) ? "Start study with finger next" : "Start study wth knuckle next" );
-                setupTasks();
-            } else {
-                pauseScreen("End of study");
-                Toast.makeText(getApplicationContext(), "All tasks done!", Toast.LENGTH_SHORT).show();
-                try {
-                    matrixOutputStream.close();
-                    matrixOutputStream = null;
-                } catch (IOException e) {
-                    e.printStackTrace();
+        if (!isEnd) {
+            if (this.taskContDescs.isEmpty() && !isPause) {
+                // Pause screen between tutorial and study OR All tasks done
+                isPause = true;
+                if (isTutorial) {
+                    pauseScreen((userID % 2 == 0) ? "Start study with finger next" : "Start study wth knuckle next");
+                    setupTasks();
+                } else {
+                    pauseScreen("End of study");
+                    Toast.makeText(getApplicationContext(), "All tasks done!", Toast.LENGTH_SHORT).show();
+                    try {
+                        matrixOutputStream.close();
+                        matrixOutputStream = null;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    isEnd = true;
                 }
-            }
-        } else if (this.taskContDescs.isEmpty() && isPause) {
-            //End Pause after pause between tutorial and study or all tasks done
-            endPauseScreen();
-            if (isTutorial) {
+            } else if (this.taskContDescs.isEmpty() && isPause) {
+                //End Pause after pause between tutorial and study or all tasks done
+                endPauseScreen();
+                if (isTutorial) {
+                    createNextTask();
+                }
+            } else if (!last_inputMethod.equals(this.taskContDescs.get(0).getInputMethodText()) && !isPause && !last_inputMethod.equals("TextView")) {
+                // Pause screen between finger and knuckle tasks
+                isPause = true;
+                if (!isTutorial) {
+                    Log.i("userid", String.valueOf(userID));
+                    pauseScreen((userID % 2 == 1) ? "Finger next" : "Knuckle next");
+                } else if (isTutorial) {
+                    if (last_inputMethod == "") {
+                        pauseScreen("Start tutorial with finger");
+                    } else {
+                        pauseScreen("Knuckle next");
+                    }
+                }
+            } else if (!last_inputMethod.equals(this.taskContDescs.get(0).getInputMethodText()) && isPause && !last_inputMethod.equals("TextView")) {
+                // Goto next task from pause screen
+                endPauseScreen();
+                createNextTask();
+            } else {
+                // Next task
                 createNextTask();
             }
-        } else if (!last_inputMethod.equals(this.taskContDescs.get(0).getInputMethodText()) && !isPause && !last_inputMethod.equals("TextView")) {
-            // Pause screen between finger and knuckle tasks
-            isPause = true;
-            if (!isTutorial) {
-                Log.i("userid", String.valueOf(userID));
-                pauseScreen((userID % 2 == 1) ? "Finger next" : "Knuckle next" );
-            } else if(isTutorial) {
-                if(last_inputMethod=="") {
-                    pauseScreen("Start tutorial with finger");
-                } else {pauseScreen("Knuckle next");}
-            }
-        } else if (!last_inputMethod.equals(this.taskContDescs.get(0).getInputMethodText()) && isPause && !last_inputMethod.equals("TextView")) {
-            // Goto next task from pause screen
-            endPauseScreen();
-            createNextTask();
-        } else {
-            // Next task
-            createNextTask();
         }
     }
 
@@ -262,7 +267,7 @@ public class TaskActivity extends AppCompatActivity {
                 Log.i("fileOutput", result);
 
                 // send via udp
-                DatagramPacket packet = new DatagramPacket(result.getBytes(), result.getBytes().length, InetAddress.getByName("192.168.0.100"), UDP_SERVER_PORT);
+                DatagramPacket packet = new DatagramPacket(result.getBytes(), result.getBytes().length, InetAddress.getByName("192.168.0.101"), UDP_SERVER_PORT);
                 if (udp_sock != null) {
                     udp_sock.send(packet);
                     //System.out.println("sent data to pc");
