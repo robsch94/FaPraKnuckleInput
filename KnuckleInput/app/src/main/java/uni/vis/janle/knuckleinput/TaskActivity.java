@@ -38,11 +38,13 @@ public class TaskActivity extends AppCompatActivity {
     public boolean actualData;
     public int userID;
     public int taskID;        // 0-16 finger tasks, 18-33 knuckel tasks
+    public int curTask;
     // output stream for capacitive matrix
     private FileOutputStream matrixOutputStream;
     private DatagramSocket udp_sock;
     private boolean isPause = false;
     private boolean isTutorial = false;
+    private boolean isEnd = false;
 
     // GUI
     TextView text_inputMethod = null;
@@ -62,7 +64,7 @@ public class TaskActivity extends AppCompatActivity {
     private void setupTutorial() {
         // Initialise taskID, get userID from MainActivity
         actualData = false;
-        taskID = 0;
+        //taskID = 0;
         isTutorial = true;
 
         // setup TaskContentDescriptions
@@ -76,18 +78,18 @@ public class TaskActivity extends AppCompatActivity {
         progressBar.setMax(taskContDescsSize);
 
         // Get first TaskContenDescription
-        nextTask();
+        pauseScreen("");
     }
 
 
     private void setupTasks() {
-        actualData = true;
-        taskID = 0;
+        //actualData = true;
+        //taskID = 0;
         isTutorial = false;
 
         List<TaskContentDescription> knuckleTasks = new ArrayList<>();
         List<TaskContentDescription> fingerTasks = new ArrayList<>();
-        for (int version = 1; version <= 1; version++) {
+        for (int version = 1; version <= 20; version++) {
             knuckleTasks.addAll(Constants.getKnuckleTasks());
             fingerTasks.addAll(Constants.getFingerTasks());
         }
@@ -107,7 +109,7 @@ public class TaskActivity extends AppCompatActivity {
         progressBar.setProgress(0);
         progressBar.setMax(taskContDescsSize);
 
-        nextTask();
+        //nextTask();
     }
 
     @Override
@@ -128,6 +130,7 @@ public class TaskActivity extends AppCompatActivity {
             udp_sock = null;
         }
         runUdpServer();
+
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -161,6 +164,8 @@ public class TaskActivity extends AppCompatActivity {
         //create file output for capacitive matrix
         try {
             matrixOutputStream = openFileOutput(String.valueOf(UserData.USERID) + "_studyData.csv", Context.MODE_APPEND);
+            matrixOutputStream.write("userID;Timestamp;Current_Task;Task_amount;TaskID;VersionID;RepetitionID;Actual_Data;Is_Pause;Image\n".getBytes());
+            Log.i("fileOutput", this.getFilesDir().getAbsolutePath());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -171,33 +176,51 @@ public class TaskActivity extends AppCompatActivity {
     private void nextTask() {
         String last_inputMethod = text_inputMethod.getText().toString();
         Log.i("last_inputMethod", last_inputMethod);
-
-        repititionID = 0;
-        if (this.taskContDescs.isEmpty() && !isPause) {
-            // Pause screen between tutorial and study OR All tasks done
-            isPause = true;
-            pauseScreen();
-            if (isTutorial) {
-                setupTasks();
+        if (!isEnd) {
+            if (this.taskContDescs.isEmpty() && !isPause) {
+                // Pause screen between tutorial and study OR All tasks done
+                isPause = true;
+                if (isTutorial) {
+                    pauseScreen((userID % 2 == 0) ? "Start study with finger next" : "Start study wth knuckle next");
+                    setupTasks();
+                } else {
+                    pauseScreen("End of study");
+                    Toast.makeText(getApplicationContext(), "All tasks done!", Toast.LENGTH_SHORT).show();
+                    try {
+                        matrixOutputStream.close();
+                        matrixOutputStream = null;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    isEnd = true;
+                }
+            } else if (this.taskContDescs.isEmpty() && isPause) {
+                //End Pause after pause between tutorial and study or all tasks done
+                endPauseScreen();
+                if (isTutorial) {
+                    createNextTask();
+                }
+            } else if (!last_inputMethod.equals(this.taskContDescs.get(0).getInputMethodText()) && !isPause && !last_inputMethod.equals("TextView")) {
+                // Pause screen between finger and knuckle tasks
+                isPause = true;
+                if (!isTutorial) {
+                    Log.i("userid", String.valueOf(userID));
+                    pauseScreen((userID % 2 == 1) ? "Finger next" : "Knuckle next");
+                } else if (isTutorial) {
+                    if (last_inputMethod == "") {
+                        pauseScreen("Start tutorial with finger");
+                    } else {
+                        pauseScreen("Knuckle next");
+                    }
+                }
+            } else if (!last_inputMethod.equals(this.taskContDescs.get(0).getInputMethodText()) && isPause && !last_inputMethod.equals("TextView")) {
+                // Goto next task from pause screen
+                endPauseScreen();
+                createNextTask();
             } else {
-                Toast.makeText(getApplicationContext(), "All tasks done!", Toast.LENGTH_SHORT).show();
+                // Next task
+                createNextTask();
             }
-        } else if (this.taskContDescs.isEmpty() && isPause) {
-            isPause = false;
-            endPauseScreen();
-            createNextTask();
-        } else if (!last_inputMethod.equals(this.taskContDescs.get(0).getInputMethodText()) && !isPause && !last_inputMethod.equals("TextView")) {
-            // Pause screen between finger and knuckle tasks
-            isPause = true;
-            pauseScreen();
-        } else if (!last_inputMethod.equals(this.taskContDescs.get(0).getInputMethodText()) && isPause && !last_inputMethod.equals("TextView")) {
-            // Goto next task from pause screen
-            isPause = false;
-            endPauseScreen();
-            createNextTask();
-        } else {
-            // Next task
-            createNextTask();
         }
     }
 
@@ -226,20 +249,25 @@ public class TaskActivity extends AppCompatActivity {
 
     void storeData(CapacitiveImageTS capImg) {
         try {
-            //TODO flush at the end (not shure, if a problem)
+            //TODO flush at the end (not sure, if a problem)
             if (matrixOutputStream != null) {
                 String result = "";
                 result += String.valueOf(userID);
                 result += ";" + String.valueOf(System.currentTimeMillis());
+                result += ";" + String.valueOf(curTask);
+                result += ";" + String.valueOf(taskContDescsSize);
                 result += ";" + String.valueOf(taskID);
+                result += ";" + String.valueOf(versionIDs[taskID]);
                 result += ";" + String.valueOf(repititionID);
+                result += ";" + String.valueOf(actualData);
+                result += ";" + String.valueOf(isPause);
                 result += ";" + capImg.toString();
                 matrixOutputStream.write((result + "\n").getBytes());
-                //matrixOutputStream.flush();
-                //System.out.println(System.currentTimeMillis());
+                matrixOutputStream.flush();
+                Log.i("fileOutput", result);
 
                 // send via udp
-                DatagramPacket packet = new DatagramPacket(result.getBytes(), result.getBytes().length, InetAddress.getByName("192.168.0.100"), UDP_SERVER_PORT);
+                DatagramPacket packet = new DatagramPacket(result.getBytes(), result.getBytes().length, InetAddress.getByName("192.168.0.101"), UDP_SERVER_PORT);
                 if (udp_sock != null) {
                     udp_sock.send(packet);
                     //System.out.println("sent data to pc");
@@ -280,7 +308,7 @@ public class TaskActivity extends AppCompatActivity {
                         } else if (lText.equals("revert")) {
                             revertTask();
                         }
-                        Thread.sleep(200);
+                        //Thread.sleep(200);
 
 
                         packet.setLength(buffer.length);
@@ -294,19 +322,18 @@ public class TaskActivity extends AppCompatActivity {
 
     }
 
-    private void pauseScreen() {
-        actualData = false;
+    private void pauseScreen(String input) {
         image_usecase.setAlpha(0.0f);
-        text_inputMethod.setText("");
-        text_gesture.setText("Pause");
+        text_inputMethod.setText(input);
+        text_gesture.setText("");
         progressBar.setAlpha(0.0f);
         text_progressBar.setAlpha(0.0f);
         text_before.setAlpha(0.0f);
         text_after.setAlpha(0.0f);
+        actualData = false;
     }
 
     private void endPauseScreen() {
-        actualData = !isTutorial;
         image_usecase.setAlpha(1.0f);
         text_inputMethod.setText("");
         text_gesture.setText("");
@@ -317,18 +344,9 @@ public class TaskActivity extends AppCompatActivity {
     }
 
     private void createNextTask() {
-        Log.i("next", "else next task");
         TaskContentDescription taskDescription = this.taskContDescs.remove(0);
         // TODO: Maybe put this in a method
         text_inputMethod.setText(taskDescription.getInputMethodText());
-        text_gesture.setText(taskDescription.getGestureText());
-        image_usecase.setImageResource(taskDescription.getImage());
-        taskID = taskDescription.getID();
-        versionIDs[taskID]++;
-
-        text_inputMethod.setText(taskDescription.getInputMethodText());
-        taskID = taskDescription.getID();
-        versionIDs[taskID]++;
         text_gesture.setText(taskDescription.getGestureText());
         image_usecase.setImageResource(taskDescription.getImage());
 
@@ -338,6 +356,13 @@ public class TaskActivity extends AppCompatActivity {
             progressBar.setProgress(progressBar.getProgress() + 1);
         }
         text_progressBar.setText(String.valueOf(progressBar.getProgress()) + "/"+String.valueOf(taskContDescsSize));
+
+        taskID = taskDescription.getID();
+        curTask = taskContDescsSize - this.taskContDescs.size();
+        versionIDs[taskID]++;
+        repititionID = 0;
+        actualData = !isTutorial;
+        isPause = false;
         // Send content
             /*
             Data to send:
