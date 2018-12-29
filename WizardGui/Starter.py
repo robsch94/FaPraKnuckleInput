@@ -9,7 +9,7 @@ import numpy as np
 
 class Starter(QObject):
 
-    PHONE_IP = "192.168.0.100"
+    PHONE_IP = "192.168.2.113"
     PHONE_PORT = 1234
     cap_sig = pyqtSignal(str)
     
