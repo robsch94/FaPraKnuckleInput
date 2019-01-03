@@ -9,6 +9,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ import org.hcilab.libftsp.capacitivematrix.blobdetection.BlobBoundingBox;
 import org.hcilab.libftsp.capacitivematrix.blobdetection.BlobDetector;
 import org.hcilab.libftsp.capacitivematrix.capmatrix.CapacitiveImageTS;
 import org.hcilab.libftsp.listeners.LocalCapImgListener;
+import org.opencv.android.OpenCVLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,6 +96,11 @@ public class FullscreenActivity extends AppCompatActivity {
         movableWindow = (RelativeLayout) findViewById(R.id.movableScreen);
         blobClassifier = new BlobClassifier(this);
 
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+            Log.i("deftest","could not initialize");
+        }
+
         LocalDeviceHandler localDeviceHandler = new LocalDeviceHandler();
         localDeviceHandler.setLocalCapImgListener(new LocalCapImgListener() {
             @Override
@@ -106,9 +113,10 @@ public class FullscreenActivity extends AppCompatActivity {
                 int[][] matrix = capImg.getMatrix();
 
                 for (BlobBoundingBox bbb : blobBoundingBoxes) {
+                    Log.i("deftest","Calling the blobcontent method");
                     flattenedBlobs.add(
                             MatrixUtils.flattenClipAndNormalizeMatrixFloat(
-                                    BlobDetector.getBlobContentIn27x15(matrix, bbb), 0, 268, 268));
+                                    ContourDetection.getBlobContentIn27x15(matrix, bbb), 0, 268, 268));
                 }
 
                 for (int i = 0; i < flattenedBlobs.size(); i++) {
