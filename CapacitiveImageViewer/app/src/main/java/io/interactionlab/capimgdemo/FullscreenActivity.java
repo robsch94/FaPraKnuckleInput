@@ -106,9 +106,12 @@ public class FullscreenActivity extends AppCompatActivity {
                 int[][] matrix = capImg.getMatrix();
 
                 for (BlobBoundingBox bbb : blobBoundingBoxes) {
+                    //flattenedBlobs.add(ConturDetection.getBlobContent(matrix, bbb));
+
                     flattenedBlobs.add(
                             MatrixUtils.flattenClipAndNormalizeMatrixFloat(
                                     BlobDetector.getBlobContentIn27x15(matrix, bbb), 0, 268, 268));
+
                 }
 
                 for (int i = 0; i < flattenedBlobs.size(); i++) {
