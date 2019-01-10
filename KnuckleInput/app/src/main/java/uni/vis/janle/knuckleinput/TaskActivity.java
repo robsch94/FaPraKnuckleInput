@@ -267,7 +267,11 @@ public class TaskActivity extends AppCompatActivity {
                 Log.i("fileOutput", result);
 
                 // send via udp
+<<<<<<< HEAD
                 DatagramPacket packet = new DatagramPacket(result.getBytes(), result.getBytes().length, InetAddress.getByName("192.168.1.100"), UDP_SERVER_PORT);
+=======
+                DatagramPacket packet = new DatagramPacket(result.getBytes(), result.getBytes().length, InetAddress.getByName("192.168.1.102"), UDP_SERVER_PORT);
+>>>>>>> af8e208a4bc1234a67227bf7c0adfd0f24cffc00
                 if (udp_sock != null) {
                     udp_sock.send(packet);
                     //System.out.println("sent data to pc");
