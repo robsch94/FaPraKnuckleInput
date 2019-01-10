@@ -89,28 +89,112 @@ Abstracts should be about 150 words. Required. See: \url{https://users.ece.cmu.e
 \end{abstract}
 
 
-\keywords{Authors' choice; of terms; separated; by semicolons; include commas, within terms only; required.}
+\keywords{Touch Input; Knuckle Input; Gestures; HCI}
 
 \maketitle
 
-\section{Introduction \& Related Work}
+\section{Introduction}
 The structure of the final submission is only a suggestion, feel free to change if it needed. Final a example publication under: \url{http://sven-mayer.com/wp-content/uploads/2017/03/le2016placement.pdf}. How to report machine learning? See: \url{http://sven-mayer.com/wp-content/uploads/2018/01/le2018palmtouch.pdf} or \url{http://sven-mayer.com/wp-content/uploads/2017/08/mayer2017orientation.pdf}.
 
 Motivate your project by reporting about related work and common goals.
 
 Random example citation \cite{Le:2018:PalmTouch}.
+\section{Related Work}
+%Andere knuckle input ideen(Sound, vibration...)
+%Andere NN zu palm touch...
+%Andere NN zu knuckle input
+%Baseline machine learning knuckle input (evtl nicht in related work) 
 
 \section{Data Collection Study}
-For 
-Here report: How and why is the data collection study designed as it is?
+In order to be able to train a model, which can detect if users used their smartphone with their knuckle or finger, we did a data collection study, in which the users had to perform 17 different gestures on a smartphone so we could collect the capacative images.
+%To gather data, which are as close to real life capacative images as possible we thought about example applications.
+%These applications would only be executed if the gesture would be performed with a knuckle, but for our study purpose we shows the same applications for the finger and knuckle gestures.
+
+\subsection{Gesture Survey}
+To figure out gestures, which users would like to use in a real world application themselfs with their knuckle, we conducted a small survey.
+In this survey we presented 20 gestures with suitable applications.
+We gathered these gestures ourselfs and from some related work. %TODO rework this sentence with related work
+Unfortunatly the results of this survey were not significant.
+Many survey participants stated, that they could not imagine to use their knuckle as an input method for smartphone touchscreens at all and answered most of the questions about a gesture with a similar score.
+This is why we chose to use 17 of these 20 gestures in our data collection study.
+We removed some of the gestures, which used two knuckle swipes, because some participants stated, that these were most particularly hard to perform.
+We still wanted to use two gestures (swipe up and down with two knuckles), in which two knuckles had to be used as we still think this might be interesting for our study purpose. 
+%TODO: Images from survey result
+
+
 \subsection{Apparatus}
-Report about your setup.
+Our apparatus consisted out of a Nexus 5, with a specific kernel, an android application, and a laptop with a python 3.6 application.
+
+In order to be able to gather the capacative images from the Nexus 5 a custom kernel had to be flashed on the smartphone.
+The kernel enabled us to gather approximately 25 capacative images per second, but slowed down the touch-input from the smartphone by a lot.
+This is one of the reasons we decided to control the smartphone with a python application from a laptop, which had an UDP-connection to the smartphone.
+When trying to interact with the smartphone by usuall touchinput, the smartphone reacted very slow and would not detect every touch input.
+To interact with the smartphone with this kernel, one often had to repeatingly click on a button, for it to recognize the input.
+This makes this smartphone unusable for any interactable application.
+The second reason for this setup was, so that we could see the capacative image as the participants were performing our study to control, that every gesture they were doing is executed correctly and if necessary alert the participant to repeat the gesture.
+From the laptop we could iterate through the 680 gestures, the participants had to do and revert the current gesture if the participant did an incorrect gesture or some other technical problem occured.
+
+The android application consisted out of two activities.
+When the application was started it would show a a small demographic datascreen, in which we input the current user ID, the participants age, and gender.
+The task application was a screen, which displayed information about the current task, participants had to perform.
+This consisted out of the current input method(finger, knuckle), the current gesture, a progress bar, and an image for an example application for the current gesture.
+
+\subsection{Data}
+We collected every capacative image we got from the smartphone, beginning when the task application was started.
+The resolution of this capacaitve image was 27 by 15 pixels and the kernel had an output of 25 images per second.
+We saved our data in an csv file.
+Next to the capacative image for every entry we saved the following data: User ID, Task ID, Timestamp, Version ID, Repetition ID, isPause boolean.
+Every user got his user ID when starting the study, starting by 1.
+As we used 17 gestures, the task ID ranged from 1 to 34, as every gesture was performed with each the finger and the knuckle.
+Every gesture had to be performed 20 times, and the version ID states the current repetition of each gesture.
+The repetition ID was set higher, when we pressed the revert button in our python application when the gesture was not performed correctly by the participants.
+We later took only the data with the highest repetition ID, for every user ID, task ID and version ID.
+
+
 \subsection{Tasks}
-Report about the tasks participants has to perform.
+The study duration was split into two parts.
+The first part was a small tutorial where the particiapnts had to do each of the 17 gestures once with the finger and knuckle each. 
+The real task began as soon as they finished this tutorial.
+All of the 17 gestures had to be executed 20 times by the participants with their finger and knuckel each, resulting in 340 $/times$ 2 gestures. 
+We randomized the order of these 17 gestures but divided the task into two halfs, one part where all the finger gestures and one all the knuckle gestures.
+We did this division into two halfs to not overload the participants mentally as this would most likely result in a high error rate, because they always had to check which input method they had to use and which gesture they had to perform with it.
+
+%TODO: image of one gesture task
+The task activity can be seen in (FIGURE).
+We displayed which input method currently should be used, which gesture should be performed, the current progress, and a picture of an example application, which would be executed if the gesture would be performed with a knuckle on a smartphone.
+As soon as the participant saw this screen he could perform the current gesture anywhere on the screen of the smartphone.
+After the participant performed the gesture correclty, we showed them the next gesture, they had to perform.
+When the gesture was performed incorrectly by the particpant we asked them to perform it again.
+
 \subsection{Procedure}
-Report about the whole procedure.
+We conducted the study in a lab environmet to have as little distraction for the participants as possible.
+After the participant entered the lab we first handed out a consent form, which the participants had to read and sign if they still wanted to participate in our study.
+We gave the participants the opportunity to take a break or abort the study at any point of the study.
+Next we asked the participant about their age and gender, to input this demographic data into the first activity of our android application.
+We also assigned each participant a userID.
+Participants with an even user ID had to perform all the finger gestures first and participants with an odd user ID had to perform the 340 gestures with the knuckle first.
+
+After we entered the participants demographic data, we started the tutorial and handed out the smartphone to the participant.
+In the tutorial we sat next to the participant and explained them every gesture and its corresponding application, asked them to perform the gesture as often as they liked to on the smartphone screen and told them if they performed the gesture in the right way.
+We controlled the android application from a laptop, were we could see the current capacative image in real time.
+From here we could skip to the next gesture or revert the current gesture if the participant did not execute the gesture corretly.
+The tutorial always started with the 17 finger gestures and followed with the 17 knuckle gestures.
+When the participant was done with the tutorial we turned the laptop away from them so they would not be distracted by the capacative image they could see on the display. 
+We now told them, that our data collection part of the study started and that they should try to execute the gestures as they would do in a real world application.
+We also asked them to perform the gesture not too fast, in order to gather as many capacative images as possible for one gesture.
+Also we told them again, that they could take a break at any point of the study or quit it.
+
+While the participants performed the gestures we looked at the capacative images on the laptop display and checked if the participant performed them in a correct way, and asked them to redo a gesture if that was not the case.
+When the participant performed a gesture correctly we showed them the next they had to perform.
+After the first 340 gesture, the participant was done with the first half of the study and we displayed a pause screen on the smartphone.
+We asked them if they needed a break, and continued with the second part of the study as soon as the participant stated he was ready.
+After the second half of the study we told them, that the study was finished, thanked them for their participation, and asked them if they had any feedback regarding the study and if they could imagine using knuckle gestures on their own smartphone if it was supported.
+
 \subsection{Participants}
-Report about age, gender, and similar demographics.
+Participants were either invited within the course or orally.
+The XX participants were XX years old on average and we had XX male participants.
+No participant was forced to do the study.
+No participant had any impairments and every participants' dominant hand was their right hand. 
 \section{Results}
 Report about your model. No source code!
 
