@@ -7,6 +7,7 @@ class TelegramCallback(Callback):
     def __init__(self, config):
         super(TelegramCallback, self).__init__()
         self.user_id = config['telegram_id']
+        self.model_name = config['model_name']
         self.bot = telegram.Bot(config['token'])
 
     def send_message(self, text):
@@ -24,3 +25,4 @@ class TelegramCallback(Callback):
         for k, v in logs.items():
             text += '{}: {:.4f}; '.format(k, v)
         self.send_message(text)
+        
