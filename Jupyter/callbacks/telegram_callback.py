@@ -17,12 +17,11 @@ class TelegramCallback(Callback):
             print('Message did not send. Error: {}.'.format(e))
 
     def on_train_begin(self, logs={}):
-        text = 'Start training model {}.'.format(self.model.name)
+        text = 'Start training model {} | {}'.format(self.model.name, self.model_name)
         self.send_message(text)
 
     def on_epoch_end(self, epoch, logs={}):
-        text = 'Epoch {}.\n'.format(epoch)
+        text = '{} | Epoch {}.\n'.format(self.model_name, epoch)
         for k, v in logs.items():
             text += '{}: {:.4f}; '.format(k, v)
         self.send_message(text)
-        
