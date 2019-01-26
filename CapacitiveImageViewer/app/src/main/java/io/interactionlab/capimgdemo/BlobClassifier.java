@@ -1,20 +1,29 @@
 package io.interactionlab.capimgdemo;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.hcilab.libftsp.capacitivematrix.blobdetection.BlobBoundingBox;
 import org.hcilab.libftsp.capacitivematrix.blobdetection.BlobCoordinates;
 import org.hcilab.libftsp.capacitivematrix.capmatrix.CapacitiveImageTS;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
 import org.opencv.core.MatOfInt;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.CvType;
+import org.opencv.core.Point;
+import org.opencv.imgproc.Imgproc;
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
 import io.interactionlab.capimgdemo.demo.ModelDescription;
 
-import org.opencv.*;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
+import static org.opencv.imgproc.Imgproc.contourArea;
+import static org.opencv.imgproc.Imgproc.threshold;
 
 /**
  * Created by Huy on 05/09/2017.
@@ -33,6 +42,7 @@ public class BlobClassifier {
     public void setModel(ModelDescription modelDescription) {
         this.modelDescription = modelDescription;
         inferenceInterface = new TensorFlowInferenceInterface(context.getAssets(), modelDescription.modelPath);
+        Log.i("Test", "Initialisation of inferenceInterface: "+String.valueOf(inferenceInterface));
     }
 
 
@@ -46,6 +56,7 @@ public class BlobClassifier {
         String[] outputNodes = new String[]{outputName};
         float[] outputs = new float[modelDescription.labels.length];
 
+        Log.i("Test", "inferenceInterface: "+String.valueOf(inferenceInterface));
         // Feed image into the model and fetch the results.
         inferenceInterface.feed(inputName, pixels, modelDescription.inputDimensions);
         inferenceInterface.run(outputNodes, true);
@@ -87,9 +98,58 @@ public class BlobClassifier {
 
     public List<BlobBoundingBox> getBlobBoundaries(CapacitiveImageTS capImg) {
         int[][] matrix = capImg.getMatrix();
-        MatOfInt image = new MatOfInt();
-        ArrayList<BlobBoundingBox> blobs = new ArrayList();
+        ArrayList<BlobBoundingBox> blobs = new ArrayList<>();
 
+        // find contours of image
+        Mat image = int27x15ToMat(matrix);
+        Mat inv_image = new Mat();
+        Core.bitwise_not(image, inv_image);
+        threshold(inv_image, image, 200, 255, THRESH_BINARY);
+        List<MatOfPoint> contours = new ArrayList<>();
+        Imgproc.findContours(image, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        if (contours.size() == 0) {
+            return blobs;
+        }
+
+        // get max contour
+        MatOfPoint max_contour = new MatOfPoint(new Point(5, 5));
+        for (int i = 0; i < contours.size(); i++) {
+            if (contourArea(contours.get(i)) > 5 && contourArea(contours.get(i)) < 255) {
+                if (contourArea(contours.get(i)) > contourArea(max_contour)) {
+                    max_contour = contours.get(i);
+                }
+            }
+        }
+
+        // get xmin, xmax, ymin, ymax
+        int x_min = 2147483647;
+        int x_max = -2147483648;
+        int y_min = 2147483647;
+        int y_max = -2147483648;
+        for (Point p : max_contour.toList()) {
+            if (p.x < x_min) {
+                x_min = (int) p.x;
+            }
+
+            if (p.y < y_min) {
+                y_min = (int) p.y;
+            }
+
+            if (p.x > x_max) {
+                x_max = (int) p.x;
+            }
+
+            if (p.y > y_max) {
+                y_max = (int) p.y;
+            }
+        }
+        BlobBoundingBox bbb = new BlobBoundingBox(x_min, y_min, x_max, y_max);
+        blobs.add(bbb);
+        return blobs;
+
+
+        /*
         for(int y = 0; y < matrix.length; ++y) {
             for(int x = 0; x < matrix[0].length; ++x) {
                 List<BlobCoordinates> found = new ArrayList();
@@ -129,6 +189,46 @@ public class BlobClassifier {
         }
 
         return blobs;
+        */
+        /*
+        #Svens new Blob detection
+        def detect_blobs(image, task):
+            #image = e.Image
+            large = np.ones((29,17), dtype=np.uint8)
+            large[1:28,1:16] = np.copy(image)
+            temp, thresh = cv2.threshold(cv2.bitwise_not(large), 205, 255, cv2.THRESH_BINARY)
+            im2, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            contours = [a for a in contours if cv2.contourArea(a) > 8 and cv2.contourArea(a) < 255]
+            lstBlob  = []
+            lstMin = []
+            lstMax = []
+            count = 0
+            contours.sort(key=lambda a: cv2.contourArea(a))
+            if len(contours) > 0:
+                # if two finger or knuckle
+                cont_count = 2 if task in [6, 7, 23, 24] and len(contours) > 1 else 1
+                for i in range(1, cont_count + 1):
+                    max_contour = contours[-1 * i]
+                    xmax, ymax = np.max(max_contour.reshape(len(max_contour),2), axis=0)
+                    xmin, ymin = np.min(max_contour.reshape(len(max_contour),2), axis=0)
+                    #croped_im = np.zeros((27,15))
+                    blob = large[max(ymin - 1, 0):min(ymax + 1, large.shape[0]),max(xmin - 1, 0):min(xmax + 1, large.shape[1])]
+                    #croped_im[0:blob.shape[0],0:blob.shape[1]] = blob
+                    #return (1, [croped_im])
+                    lstBlob.append(blob)
+                    lstMin.append(xmax-xmin)
+                    lstMax.append(ymax-ymin)
+                    count = count + 1
+                return (count, lstBlob, lstMin, lstMax)
+            else:
+                return (0, [np.zeros((29, 19))], 0, 0)
+       */
+        /*
+        def pasteToEmpty (blob):
+        croped_im = np.zeros((27,15))
+        croped_im[0:blob.shape[0],0:blob.shape[1]] = blob
+        return croped_im
+        */
     }
 
     private void blobDetection(int[][] matrix, int x, int y, List<BlobCoordinates> found) {
@@ -139,6 +239,16 @@ public class BlobClassifier {
             blobDetection(matrix, x, y + 1, found);
             blobDetection(matrix, x, y - 1, found);
         }
+    }
 
+    public Mat int27x15ToMat(int[][] matrix) {
+        Mat image = new Mat(27, 15, CvType.CV_8UC1);
+        for (int x = 0; x < 27; x++) {
+            for (int y = 0; y < 15; y++) {
+                //Log.i("Test", String.valueOf(matrix[x][y]));
+                image.put(x, y, (double) matrix[x][y]);
+            }
+        }
+        return image;
     }
 }

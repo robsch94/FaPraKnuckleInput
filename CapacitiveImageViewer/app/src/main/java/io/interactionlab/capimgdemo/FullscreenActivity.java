@@ -112,16 +112,22 @@ public class FullscreenActivity extends AppCompatActivity {
                 List<float[]> flattenedBlobs = new ArrayList<float[]>();
                 int[][] matrix = capImg.getMatrix();
 
+                Log.i("Test", "BlobBoundingBoxes: "+String.valueOf(blobBoundingBoxes));
+
                 for (BlobBoundingBox bbb : blobBoundingBoxes) {
                     //flattenedBlobs.add(ConturDetection.getBlobContent(matrix, bbb));
 
+                    Log.i("Test", "Yes we go in here!");
                     flattenedBlobs.add(
                             MatrixUtils.flattenClipAndNormalizeMatrixFloat(
                                     blobClassifier.getBlobContentIn27x15(matrix, bbb), 0, 268, 268));
 
                 }
 
+                Log.i("Test", "flattenedBlobs: "+String.valueOf(flattenedBlobs));
+
                 for (int i = 0; i < flattenedBlobs.size(); i++) {
+                    Log.i("Test", "flattenedBlobs.get(0): "+String.valueOf(flattenedBlobs.get(i)));
                     ClassificationResult cr = blobClassifier.classify(flattenedBlobs.get(i));
                     labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
                     colors.add(cr.color);
