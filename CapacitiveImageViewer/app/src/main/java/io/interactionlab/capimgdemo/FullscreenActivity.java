@@ -9,6 +9,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ import org.hcilab.libftsp.capacitivematrix.blobdetection.BlobBoundingBox;
 import org.hcilab.libftsp.capacitivematrix.blobdetection.BlobDetector;
 import org.hcilab.libftsp.capacitivematrix.capmatrix.CapacitiveImageTS;
 import org.hcilab.libftsp.listeners.LocalCapImgListener;
+import org.opencv.android.OpenCVLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,12 @@ import io.interactionlab.capimgdemo.demo.ModelDescription;
  * status bar and navigation/system bar) with user interaction.
  */
 public class FullscreenActivity extends AppCompatActivity {
-
+    static {
+        if (!OpenCVLoader.initDebug())
+            Log.d("ERROR", "Unable to load OpenCV");
+        else
+            Log.d("SUCCESS", "OpenCV loaded");
+    }
     /**
      * Some older devices needs a small delay between UI widget updates
      * and a change of the status and navigation bar.
@@ -98,7 +105,7 @@ public class FullscreenActivity extends AppCompatActivity {
         localDeviceHandler.setLocalCapImgListener(new LocalCapImgListener() {
             @Override
             public void onLocalCapImg(final CapacitiveImageTS capImg) { // called approximately every 50ms
-                final List<BlobBoundingBox> blobBoundingBoxes = capImg.getBlobBoundaries();
+                final List<BlobBoundingBox> blobBoundingBoxes = blobClassifier.getBlobBoundaries(capImg);
                 final List<String> labelNames = new ArrayList<String>();
                 final List<Integer> colors = new ArrayList<Integer>();
 
@@ -110,7 +117,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
                     flattenedBlobs.add(
                             MatrixUtils.flattenClipAndNormalizeMatrixFloat(
-                                    BlobDetector.getBlobContentIn27x15(matrix, bbb), 0, 268, 268));
+                                    blobClassifier.getBlobContentIn27x15(matrix, bbb), 0, 268, 268));
 
                 }
 
