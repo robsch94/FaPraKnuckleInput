@@ -10,8 +10,8 @@ public class DemoSettings {
     public static ModelDescription[] models = new ModelDescription[]{
             new ModelDescription(
                     "KnuckleFinger",
-                    "file:///android_asset/knucklebad.pb",
-                    "conv2d_7_input",
+                    "file:///android_asset/10_01_19.pb",
+                    "conv2d_1_input",
                     "output_node0",
                     new long[]{1, 27, 15, 1},
                     new String[]{"Knuckle", "Finger"},
