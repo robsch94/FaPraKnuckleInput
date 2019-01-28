@@ -25,6 +25,7 @@ import org.opencv.android.OpenCVLoader;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.interactionlab.capimgdemo.demo.BlobDetectionTest;
 import io.interactionlab.capimgdemo.demo.DemoSettings;
 import io.interactionlab.capimgdemo.demo.ModelDescription;
 
@@ -106,6 +107,7 @@ public class FullscreenActivity extends AppCompatActivity {
             @Override
             public void onLocalCapImg(final CapacitiveImageTS capImg) { // called approximately every 50ms
                 final List<BlobBoundingBox> blobBoundingBoxes = blobClassifier.getBlobBoundaries(capImg);
+                //Right until this point
                 final List<String> labelNames = new ArrayList<String>();
                 final List<Integer> colors = new ArrayList<Integer>();
 

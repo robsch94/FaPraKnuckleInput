@@ -15,6 +15,7 @@ import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
+import io.interactionlab.capimgdemo.demo.BlobDetectionTest;
 import io.interactionlab.capimgdemo.demo.ModelDescription;
 
 import java.util.ArrayList;
@@ -83,28 +84,48 @@ public class BlobClassifier {
     }
 
     public int[][] getBlobContentIn27x15(int[][] matrix, BlobBoundingBox bbb) {
-        int[][] blob = new int[27][15];
+        // first extract the blob
+        int y1 = Math.max(bbb.y1 - 1, 0);
+        int y2 = Math.max(bbb.y2 + 1, 29);
+        int x1 = Math.max(bbb.x1 - 1, 0);
+        int x2 = Math.max(bbb.x2 + 1, 17);
+
+        int[][] blob = new int[y2-y1][x2-x1];
+        for (int y = 0; y < blob.length; y++) {
+            for (int x = 0; x < blob[0].length; x++) {
+                blob[y][x] = matrix[y1+y][x1+x];
+            }
+        }
+
+        // put it in new 27x15 image
+        int[][] image = new int[27][15];
         int delta_x = bbb.x2 - bbb.x1;
         int delta_y = bbb.y2 - bbb.y1;
 
         for(int y = 0; y < delta_y; y++) {
             for(int x = 0; x < delta_x; x++) {
-                blob[y][x] = matrix[bbb.y1 + y][bbb.x1 + x];
+                image[y][x] = matrix[bbb.y1 + y][bbb.x1 + x];
             }
         }
+        Log.i("Test", "Blob: \n" + String.valueOf(blob));
 
-        return blob;
+        return image;
     }
 
     public List<BlobBoundingBox> getBlobBoundaries(CapacitiveImageTS capImg) {
         int[][] matrix = capImg.getMatrix();
+        //TODO: Just for testing purposes
+        matrix = BlobDetectionTest.t1_pre;
         ArrayList<BlobBoundingBox> blobs = new ArrayList<>();
 
         // find contours of image
         Mat image = int27x15ToMat(matrix);
+        Log.i("Test", "Image after int27x15ToMat: \n"+image.dump());
         Mat inv_image = new Mat();
         Core.bitwise_not(image, inv_image);
-        threshold(inv_image, image, 200, 255, THRESH_BINARY);
+        Log.i("Test", "Inverse image: \n"+inv_image.dump());
+        threshold(inv_image, image, 205, 255, THRESH_BINARY);
+        Log.i("Test", "Image after threshold: \n"+image.dump());
         List<MatOfPoint> contours = new ArrayList<>();
         Imgproc.findContours(image, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
@@ -120,6 +141,10 @@ public class BlobClassifier {
                     max_contour = contours.get(i);
                 }
             }
+        }
+
+        if (contourArea(max_contour)==contourArea(new MatOfPoint(new Point(5, 5)))) {
+            return blobs;
         }
 
         // get xmin, xmax, ymin, ymax
@@ -145,51 +170,10 @@ public class BlobClassifier {
             }
         }
         BlobBoundingBox bbb = new BlobBoundingBox(x_min, y_min, x_max, y_max);
+        // The BlobBoundingBox is right!!!
         blobs.add(bbb);
         return blobs;
 
-
-        /*
-        for(int y = 0; y < matrix.length; ++y) {
-            for(int x = 0; x < matrix[0].length; ++x) {
-                List<BlobCoordinates> found = new ArrayList();
-                blobDetection(matrix, x, y, found);
-                if (found.size() > 0) {
-                    int x_min = 2147483647;
-                    int x_max = -2147483648;
-                    int y_min = 2147483647;
-                    int y_max = -2147483648;
-                    Iterator var10 = found.iterator();
-
-                    while(var10.hasNext()) {
-                        BlobCoordinates b = (BlobCoordinates)var10.next();
-                        if (b.x1 < x_min) {
-                            x_min = b.x1;
-                        }
-
-                        if (b.y1 < y_min) {
-                            y_min = b.y1;
-                        }
-
-                        if (b.x1 > x_max) {
-                            x_max = b.x1;
-                        }
-
-                        if (b.y1 > y_max) {
-                            y_max = b.y1;
-                        }
-                    }
-
-                    BlobBoundingBox bbb = new BlobBoundingBox(x_min - 1, y_min - 1, x_max + 1, y_max + 1);
-                    if (!blobs.contains(bbb) && (x_max - x_min) * (y_max - y_min) > 1) {
-                        blobs.add(bbb);
-                    }
-                }
-            }
-        }
-
-        return blobs;
-        */
         /*
         #Svens new Blob detection
         def detect_blobs(image, task):
@@ -242,11 +226,18 @@ public class BlobClassifier {
     }
 
     public Mat int27x15ToMat(int[][] matrix) {
-        Mat image = new Mat(27, 15, CvType.CV_8UC1);
+        Mat image = new Mat(29, 17, CvType.CV_8UC1);
+        // np.ones((29,17))
+        for (int x = 0; x < 29; x++) {
+            for (int y = 0; y < 17; y++) {
+                image.put(x, y, 1);
+            }
+        }
+        // fill in matrix
         for (int x = 0; x < 27; x++) {
             for (int y = 0; y < 15; y++) {
                 //Log.i("Test", String.valueOf(matrix[x][y]));
-                image.put(x, y, (double) matrix[x][y]);
+                image.put(1+x, 1+y, (double) matrix[x][y]);
             }
         }
         return image;
