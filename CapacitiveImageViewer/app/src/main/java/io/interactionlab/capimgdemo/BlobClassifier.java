@@ -38,7 +38,7 @@ public class BlobClassifier {
     private Context context;
     private ModelDescription modelDescription;
 
-    public BlobClassifier(Context context) {
+    BlobClassifier(Context context) {
         // Loading model from assets folder.
         this.context = context;
     }
@@ -48,7 +48,6 @@ public class BlobClassifier {
         inferenceInterface = new TensorFlowInferenceInterface(context.getAssets(), modelDescription.modelPath);
         //Log.i("Test", "Initialisation of inferenceInterface: "+String.valueOf(inferenceInterface));
     }
-
 
     public ClassificationResult classify(float[] pixels) {
         // Node Names
@@ -60,7 +59,7 @@ public class BlobClassifier {
         float[] outputs = new float[modelDescription.labels.length];
 
         //Log.i("Test", "inferenceInterface: "+String.valueOf(inferenceInterface));
-        Tensor a = Tensor.create(modelDescription.inputDimensions, FloatBuffer.wrap(pixels));
+        //Tensor a = Tensor.create(modelDescription.inputDimensions, FloatBuffer.wrap(pixels));
         //Log.i("Test", "Tensor: "+a.toString());
 
         // Feed image into the model and fetch the results.
@@ -93,6 +92,16 @@ public class BlobClassifier {
         cr.color = modelDescription.labelColor[idx];
 
         return cr;
+    }
+
+    public float[] imagesToPixels(List<int[][]> images) {
+        int w = images.get(0)[0].length;
+        int h = images.get(0).length;
+        float[] pixels = new float[images.size() * w * h];
+        for (int i = 0; i < pixels.length; i++) {
+            pixels[i] = images.get(i/(w*h))[(i/w)%h][i%w];
+        }
+        return pixels;
     }
 
     public float[] getBlobContentIn27x15(int[][] matrix, BlobBoundingBox bbb) {
@@ -203,7 +212,7 @@ public class BlobClassifier {
         return blobs;
     }
 
-    public Mat int27x15ToPaddedMat(int[][] matrix) {
+    private Mat int27x15ToPaddedMat(int[][] matrix) {
         Mat image = new Mat(29, 17, CvType.CV_8UC1);
         // np.ones((29,17))
         for (int x = 0; x < 29; x++) {
@@ -221,7 +230,7 @@ public class BlobClassifier {
         return image;
     }
 
-    public Mat int29x17ToMat(int[][] matrix) {
+    private Mat int29x17ToMat(int[][] matrix) {
         Mat image = new Mat(29, 17, CvType.CV_8UC1);
         // fill in matrix
         for (int x = 0; x < 29; x++) {
@@ -232,7 +241,7 @@ public class BlobClassifier {
         return image;
     }
 
-    public int[][] matToInt2D(Mat mat) {
+    private int[][] matToInt2D(Mat mat) {
         int[][] matrix = new int[mat.rows()][mat.cols()];
         for (int x = 0; x < mat.rows(); x++) {
             for (int y = 0; y < mat.cols(); y++) {

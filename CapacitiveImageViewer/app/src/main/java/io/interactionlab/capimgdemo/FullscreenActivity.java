@@ -90,6 +90,8 @@ public class FullscreenActivity extends AppCompatActivity {
     private BlobClassifier blobClassifier;
     private ModelDescription currentModel;
 
+    private boolean lstm = false;
+
     private void setModel(ModelDescription modelDescription) {
         currentModel = modelDescription;
         blobClassifier.setModel(currentModel);
@@ -115,23 +117,31 @@ public class FullscreenActivity extends AppCompatActivity {
                 final List<String> labelNames = new ArrayList<String>();
                 final List<Integer> colors = new ArrayList<Integer>();
                 List<float[]> flattenedBlobs = new ArrayList<float[]>();
+                List<int[][]> images = new ArrayList<int[][]>();
 
                 //TODO: following line just for testing
                 //matrix = BlobDetectionTest.t1_pre;
                 //Log.i("Large", "Large still right?? \n" + Arrays.deepToString(large));
 
                 for (BlobBoundingBox bbb : blobBoundingBoxes) {
-                    //flattenedBlobs.add(
-                    //        MatrixUtils.flattenClipAndNormalizeMatrixFloat(
-                    //                blobClassifier.getBlobContentIn27x15(large, bbb), 0, 268, 268));
+                    if (lstm) {images.add(capImg.getMatrix());}
                     flattenedBlobs.add(blobClassifier.getBlobContentIn27x15(large, bbb));
                 }
 
-                for (int i = 0; i < flattenedBlobs.size(); i++) {
-                    //Log.i("Test", "flattenedBlobs.get(0): "+ Arrays.toString(flattenedBlobs.get(i)));
-                    ClassificationResult cr = blobClassifier.classify(flattenedBlobs.get(i));
-                    labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
-                    colors.add(cr.color);
+                if (lstm) {
+                    if (images.size() == 30) {
+                        ClassificationResult cr = blobClassifier.classify(blobClassifier.imagesToPixels(images));
+                        labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
+                        colors.add(cr.color);
+                        images.clear();
+                    }
+                } else {
+                    for (int i = 0; i < flattenedBlobs.size(); i++) {
+                        //Log.i("Test", "flattenedBlobs.get(0): "+ Arrays.toString(flattenedBlobs.get(i)));
+                        ClassificationResult cr = blobClassifier.classify(flattenedBlobs.get(i));
+                        labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
+                        colors.add(cr.color);
+                    }
                 }
 
                 runOnUiThread(new Runnable() {
