@@ -21,10 +21,13 @@ import org.hcilab.libftsp.capacitivematrix.blobdetection.BlobDetector;
 import org.hcilab.libftsp.capacitivematrix.capmatrix.CapacitiveImageTS;
 import org.hcilab.libftsp.listeners.LocalCapImgListener;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Mat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import io.interactionlab.capimgdemo.demo.BlobDetectionTest;
 import io.interactionlab.capimgdemo.demo.DemoSettings;
 import io.interactionlab.capimgdemo.demo.ModelDescription;
 
@@ -87,6 +90,8 @@ public class FullscreenActivity extends AppCompatActivity {
     private BlobClassifier blobClassifier;
     private ModelDescription currentModel;
 
+    private boolean lstm = false;
+
     private void setModel(ModelDescription modelDescription) {
         currentModel = modelDescription;
         blobClassifier.setModel(currentModel);
@@ -105,32 +110,38 @@ public class FullscreenActivity extends AppCompatActivity {
         localDeviceHandler.setLocalCapImgListener(new LocalCapImgListener() {
             @Override
             public void onLocalCapImg(final CapacitiveImageTS capImg) { // called approximately every 50ms
-                final List<BlobBoundingBox> blobBoundingBoxes = blobClassifier.getBlobBoundaries(capImg);
+
+                int[][] large = blobClassifier.preprocess(capImg);
+                //Log.i("Large", "Large right here?? \n" + Arrays.deepToString(large));
+                final List<BlobBoundingBox> blobBoundingBoxes = blobClassifier.getBlobBoundaries(large);
                 final List<String> labelNames = new ArrayList<String>();
                 final List<Integer> colors = new ArrayList<Integer>();
-
                 List<float[]> flattenedBlobs = new ArrayList<float[]>();
-                int[][] matrix = capImg.getMatrix();
+                List<int[][]> images = new ArrayList<int[][]>();
 
-                Log.i("Test", "BlobBoundingBoxes: "+String.valueOf(blobBoundingBoxes));
+                //TODO: following line just for testing
+                //matrix = BlobDetectionTest.t1_pre;
+                //Log.i("Large", "Large still right?? \n" + Arrays.deepToString(large));
 
                 for (BlobBoundingBox bbb : blobBoundingBoxes) {
-                    //flattenedBlobs.add(ConturDetection.getBlobContent(matrix, bbb));
-
-                    Log.i("Test", "Yes we go in here!");
-                    flattenedBlobs.add(
-                            MatrixUtils.flattenClipAndNormalizeMatrixFloat(
-                                    blobClassifier.getBlobContentIn27x15(matrix, bbb), 0, 268, 268));
-
+                    if (lstm) {images.add(capImg.getMatrix());}
+                    flattenedBlobs.add(blobClassifier.getBlobContentIn27x15(large, bbb));
                 }
 
-                Log.i("Test", "flattenedBlobs: "+String.valueOf(flattenedBlobs));
-
-                for (int i = 0; i < flattenedBlobs.size(); i++) {
-                    Log.i("Test", "flattenedBlobs.get(0): "+String.valueOf(flattenedBlobs.get(i)));
-                    ClassificationResult cr = blobClassifier.classify(flattenedBlobs.get(i));
-                    labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
-                    colors.add(cr.color);
+                if (lstm) {
+                    if (images.size() == 30) {
+                        ClassificationResult cr = blobClassifier.classify(blobClassifier.imagesToPixels(images));
+                        labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
+                        colors.add(cr.color);
+                        images.clear();
+                    }
+                } else {
+                    for (int i = 0; i < flattenedBlobs.size(); i++) {
+                        //Log.i("Test", "flattenedBlobs.get(0): "+ Arrays.toString(flattenedBlobs.get(i)));
+                        ClassificationResult cr = blobClassifier.classify(flattenedBlobs.get(i));
+                        labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
+                        colors.add(cr.color);
+                    }
                 }
 
                 runOnUiThread(new Runnable() {
