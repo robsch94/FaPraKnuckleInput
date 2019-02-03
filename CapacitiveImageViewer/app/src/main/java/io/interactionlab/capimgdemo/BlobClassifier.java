@@ -49,7 +49,7 @@ public class BlobClassifier {
         //Log.i("Test", "Initialisation of inferenceInterface: "+String.valueOf(inferenceInterface));
     }
 
-    public ClassificationResult classify(float[] pixels) {
+    public ClassificationResult classify(float[] pixels, boolean lstm) {
         // Node Names
         String inputName = modelDescription.inputNode;
         String outputName = modelDescription.outputNode;
@@ -67,30 +67,61 @@ public class BlobClassifier {
         inferenceInterface.run(outputNodes, true);
         inferenceInterface.fetch(outputName, outputs);
 
-
-        // Convert one-hot encoded result to an int (= detected class)
-        float maxConf = Float.MIN_VALUE;
-        int idx = -1;
-        for (int i = 0; i < outputs.length; i++) {
-            if (outputs[i] > maxConf) {
-                maxConf = outputs[i];
-                idx = i;
-            }
-        }
-
-        //TODO: Norm the output of best index??
-        float norm = 0.0f;
-        for (int i = 0; i < outputs.length; i++) {
-            norm += outputs[i];
-        }
-        maxConf = maxConf / norm;
-
         ClassificationResult cr = new ClassificationResult();
-        cr.index = idx;
-        cr.label = modelDescription.labels[idx];
-        cr.confidence = maxConf;
-        cr.color = modelDescription.labelColor[idx];
+        if (lstm) {
+            // Convert concated one-hots
+            float maxConf = Float.MIN_VALUE;
+            float maxConfGest = Float.MIN_VALUE;
+            float maxConfInput = Float.MIN_VALUE;
+            int idxGest = -1;
+            int idxInput = -1;
+            for (int i = 0; i < outputs.length-2; i++) {
+                if (outputs[i] > maxConfGest) {
+                    maxConfGest = outputs[i];
+                    idxGest = i;
+                }
+            }
+            if (outputs[outputs.length-1] > outputs[outputs.length-2]) {
+                idxInput = outputs.length-1;
+                maxConfInput = outputs[outputs.length-1];
+            } else {
+                idxInput = outputs.length-2;
+                maxConfInput = outputs[outputs.length-2];
+            }
 
+            float norm = 0.0f;
+            for (int i = 0; i < outputs.length; i++) {
+                norm += outputs[i];
+            }
+            maxConf = (maxConfGest + maxConfInput) / norm;
+
+            cr.index = idxGest;
+            cr.label = modelDescription.labels[idxInput]+": "+modelDescription.labels[idxGest];
+            cr.confidence = maxConf;
+            cr.color = modelDescription.labelColor[idxGest];
+
+        } else {
+            // Convert one-hot encoded result to an int (= detected class)
+            float maxConf = Float.MIN_VALUE;
+            int idx = -1;
+            for (int i = 0; i < outputs.length; i++) {
+                if (outputs[i] > maxConf) {
+                    maxConf = outputs[i];
+                    idx = i;
+                }
+            }
+
+            float norm = 0.0f;
+            for (int i = 0; i < outputs.length; i++) {
+                norm += outputs[i];
+            }
+            maxConf = maxConf / norm;
+
+            cr.index = idx;
+            cr.label = modelDescription.labels[idx];
+            cr.confidence = maxConf;
+            cr.color = modelDescription.labelColor[idx];
+        }
         return cr;
     }
 

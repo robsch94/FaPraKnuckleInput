@@ -12,6 +12,9 @@ import org.hcilab.libftsp.capacitivematrix.capmatrix.CapacitiveImageTS;
 
 import java.util.List;
 
+import io.interactionlab.capimgdemo.demo.DemoSettings;
+import io.interactionlab.capimgdemo.demo.ModelDescription;
+
 /**
  * Created by Huy on 12/12/2017.
  */
@@ -23,6 +26,7 @@ public class DrawView extends View {
     private List<BlobBoundingBox> bbbl;
     private List<String> labels;
     private List<Integer> colors;
+    private boolean lstm;
 
     public DrawView(Context context) {
         super(context);
@@ -34,13 +38,43 @@ public class DrawView extends View {
         invalidate();
     }
 
-    public void updateView(CapacitiveImageTS capacitiveImage, List<BlobBoundingBox> bbbl, List<String> labels, List<Integer> colors) {
+    public void updateView(CapacitiveImageTS capacitiveImage, List<BlobBoundingBox> bbbl, List<String> labels, List<Integer> colors, boolean lstm) {
         this.capacitiveImage = capacitiveImage;
         this.bbbl = bbbl;
         this.labels = labels;
         this.colors = colors;
+        this.lstm = lstm;
         invalidate();
     }
+
+    private void onDrawCNN(Canvas canvas, int boxWidth, int boxHeight) {
+        if (bbbl != null) {
+            // Draw Labels
+            for (int i = 0; i < bbbl.size(); i++) {
+                BlobBoundingBox bbb = bbbl.get(i);
+                paint.setColor(this.colors.get(i));
+                paint.setStyle(Paint.Style.STROKE);
+                Rect r = new Rect(bbb.x1 * boxWidth, bbb.y1 * boxHeight, bbb.x2 * boxWidth, bbb.y2 * boxHeight);
+                canvas.drawRect(r, paint);
+
+                paint.setTextSize(45);
+                canvas.drawText(labels.get(i), bbb.x1 * boxWidth - (int) (1.0 * boxWidth), bbb.y1 * boxHeight - (int) (1.0 * boxHeight), paint);
+            }
+        }
+    }
+
+    private void onDrawLSTMCNN(Canvas canvas, int boxWidth, int boxHeight) {
+        if (!labels.isEmpty()) {
+            paint.setColor(Color.GREEN);
+            paint.setStyle(Paint.Style.STROKE);
+            Rect r = new Rect(1 * boxWidth, 5 * boxHeight, 14 * boxWidth, 10 * boxHeight);
+            canvas.drawRect(r, paint);
+
+            paint.setTextSize(45);
+            canvas.drawText(labels.get(0), 2 * boxWidth, 7 * boxHeight, paint);
+        }
+    }
+
 
     @Override
     public void onDraw(Canvas canvas) {
@@ -77,19 +111,11 @@ public class DrawView extends View {
                 canvas.drawText(val + "", j * boxWidth + (int) (0.5 * boxWidth), i * boxHeight + (int) (0.5 * boxHeight), paint);
             }
         }
-//
-        if (bbbl != null) {
-            // Draw Labels
-            for (int i = 0; i < bbbl.size(); i++) {
-                BlobBoundingBox bbb = bbbl.get(i);
-                paint.setColor(this.colors.get(i));
-                paint.setStyle(Paint.Style.STROKE);
-                Rect r = new Rect(bbb.x1 * boxWidth, bbb.y1 * boxHeight, bbb.x2 * boxWidth, bbb.y2 * boxHeight);
-                canvas.drawRect(r, paint);
-
-                paint.setTextSize(45);
-                canvas.drawText(labels.get(i), bbb.x1 * boxWidth - (int) (1.0 * boxWidth), bbb.y1 * boxHeight - (int) (1.0 * boxHeight), paint);
-            }
+        if (lstm) {
+            onDrawLSTMCNN(canvas, boxWidth, boxHeight);
+        } else {
+            onDrawCNN(canvas, boxWidth, boxHeight);
         }
+
     }
 }

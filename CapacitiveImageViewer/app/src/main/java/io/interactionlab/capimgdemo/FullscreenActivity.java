@@ -81,7 +81,6 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     };
 
-
     private static final String TAG = FullscreenActivity.class.getSimpleName();
     private RelativeLayout movableWindow;
     private DrawView drawView;
@@ -90,7 +89,8 @@ public class FullscreenActivity extends AppCompatActivity {
     private BlobClassifier blobClassifier;
     private ModelDescription currentModel;
 
-    private boolean lstm = false;
+    private boolean lstm = true;
+    private int classification_display_length = 0;
 
     private void setModel(ModelDescription modelDescription) {
         currentModel = modelDescription;
@@ -106,50 +106,65 @@ public class FullscreenActivity extends AppCompatActivity {
         movableWindow = (RelativeLayout) findViewById(R.id.movableScreen);
         blobClassifier = new BlobClassifier(this);
 
+        final List<int[][]> images = new ArrayList<>();
+
         LocalDeviceHandler localDeviceHandler = new LocalDeviceHandler();
         localDeviceHandler.setLocalCapImgListener(new LocalCapImgListener() {
             @Override
             public void onLocalCapImg(final CapacitiveImageTS capImg) { // called approximately every 50ms
 
-                int[][] large = blobClassifier.preprocess(capImg);
-                //Log.i("Large", "Large right here?? \n" + Arrays.deepToString(large));
-                final List<BlobBoundingBox> blobBoundingBoxes = blobClassifier.getBlobBoundaries(large);
-                final List<String> labelNames = new ArrayList<String>();
-                final List<Integer> colors = new ArrayList<Integer>();
-                List<float[]> flattenedBlobs = new ArrayList<float[]>();
-                List<int[][]> images = new ArrayList<int[][]>();
+                if (classification_display_length == 0) {
+                    int[][] large = blobClassifier.preprocess(capImg);
+                    //Log.i("Large", "Large right here?? \n" + Arrays.deepToString(large));
+                    final List<BlobBoundingBox> blobBoundingBoxes = blobClassifier.getBlobBoundaries(large);
+                    final List<String> labelNames = new ArrayList<>();
+                    final List<Integer> colors = new ArrayList<>();
+                    List<float[]> flattenedBlobs = new ArrayList<>();
 
-                //TODO: following line just for testing
-                //matrix = BlobDetectionTest.t1_pre;
-                //Log.i("Large", "Large still right?? \n" + Arrays.deepToString(large));
+                    //TODO: following line just for testing
+                    //matrix = BlobDetectionTest.t1_pre;
+                    //Log.i("Large", "Large still right?? \n" + Arrays.deepToString(large));
 
-                for (BlobBoundingBox bbb : blobBoundingBoxes) {
-                    if (lstm) {images.add(capImg.getMatrix());}
-                    flattenedBlobs.add(blobClassifier.getBlobContentIn27x15(large, bbb));
-                }
-
-                if (lstm) {
-                    if (images.size() == 30) {
-                        ClassificationResult cr = blobClassifier.classify(blobClassifier.imagesToPixels(images));
-                        labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
-                        colors.add(cr.color);
-                        images.clear();
+                    // if first blob already detected, add each image up to 30
+                    if (lstm && !images.isEmpty()) {
+                        images.add(capImg.getMatrix());
                     }
-                } else {
-                    for (int i = 0; i < flattenedBlobs.size(); i++) {
-                        //Log.i("Test", "flattenedBlobs.get(0): "+ Arrays.toString(flattenedBlobs.get(i)));
-                        ClassificationResult cr = blobClassifier.classify(flattenedBlobs.get(i));
-                        labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
-                        colors.add(cr.color);
-                    }
-                }
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        drawView.updateView(capImg, blobBoundingBoxes, labelNames, colors);
+                    for (BlobBoundingBox bbb : blobBoundingBoxes) {
+                        if (images.isEmpty()) {
+                            images.add(capImg.getMatrix());
+                        }         // first detected blob
+                        flattenedBlobs.add(blobClassifier.getBlobContentIn27x15(large, bbb));
                     }
-                });
+
+                    if (lstm) {
+                        if (images.size() == 30) {                   // classify after 30 images
+                            Log.i("Test", "Classifying LSTM+CNN");
+                            ClassificationResult cr = blobClassifier.classify(blobClassifier.imagesToPixels(images), lstm);
+                            labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
+                            colors.add(cr.color);
+                            images.clear();
+                        }
+                    } else {
+                        for (int i = 0; i < flattenedBlobs.size(); i++) {      // always classify
+                            //Log.i("Test", "flattenedBlobs.get(0): "+ Arrays.toString(flattenedBlobs.get(i)));
+                            ClassificationResult cr = blobClassifier.classify(flattenedBlobs.get(i), lstm);
+                            labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
+                            colors.add(cr.color);
+                        }
+                    }
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            drawView.updateView(capImg, blobBoundingBoxes, labelNames, colors, lstm);
+                        }
+                    });
+
+                    if (!labelNames.isEmpty()) {
+                        classification_display_length = 20;
+                    }
+                } else {classification_display_length--;}
             }
         });
         localDeviceHandler.startHandler();
@@ -195,7 +210,7 @@ public class FullscreenActivity extends AppCompatActivity {
             }
         });
 
-        setModel(DemoSettings.models[0]);
+        setModel(DemoSettings.models[1]);
     }
 
 
