@@ -69,6 +69,7 @@ public class BlobClassifier {
 
         ClassificationResult cr = new ClassificationResult();
         if (lstm) {
+            /*
             // Convert concated one-hots
             float maxConf = Float.MIN_VALUE;
             float maxConfGest = Float.MIN_VALUE;
@@ -99,7 +100,26 @@ public class BlobClassifier {
             cr.label = modelDescription.labels[idxInput]+": "+modelDescription.labels[idxGest];
             cr.confidence = maxConf;
             cr.color = modelDescription.labelColor[idxGest];
+            */
+            // Convert concated one-hots
+            float maxConf = Float.MIN_VALUE;
+            int idxGest = -1;
+            for (int i = 0; i < outputs.length; i++) {
+                if (outputs[i] > maxConf) {
+                    maxConf = outputs[i];
+                    idxGest = i;
+                }
+            }
+            float norm = 0.0f;
+            for (int i = 0; i < outputs.length; i++) {
+                norm += outputs[i];
+            }
+            maxConf = maxConf / norm;
 
+            cr.index = idxGest;
+            cr.label = modelDescription.labels[idxGest];
+            cr.confidence = maxConf;
+            cr.color = modelDescription.labelColor[idxGest];
         } else {
             // Convert one-hot encoded result to an int (= detected class)
             float maxConf = Float.MIN_VALUE;
