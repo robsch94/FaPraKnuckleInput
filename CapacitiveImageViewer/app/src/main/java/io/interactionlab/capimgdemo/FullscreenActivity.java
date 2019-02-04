@@ -90,6 +90,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private ModelDescription currentModel;
 
     private boolean lstm = true;
+    private final static int WINDOW_SIZE = 50;
     private int classification_display_length = 0;
 
     private void setModel(ModelDescription modelDescription) {
@@ -138,7 +139,7 @@ public class FullscreenActivity extends AppCompatActivity {
                     }
 
                     if (lstm) {
-                        if (images.size() == 30) {                   // classify after 30 images
+                        if (images.size() == WINDOW_SIZE) {                   // classify after 30 images
                             Log.i("Test", "Classifying LSTM+CNN");
                             ClassificationResult cr = blobClassifier.classify(blobClassifier.imagesToPixels(images), lstm);
                             labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
@@ -210,7 +211,7 @@ public class FullscreenActivity extends AppCompatActivity {
             }
         });
 
-        setModel(DemoSettings.models[1]);
+        setModel(DemoSettings.models[0]);
     }
 
 
