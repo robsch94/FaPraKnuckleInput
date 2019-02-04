@@ -132,7 +132,7 @@ public class FullscreenActivity extends AppCompatActivity {
                     }
 
                     for (BlobBoundingBox bbb : blobBoundingBoxes) {
-                        if (images.isEmpty()) {
+                        if (lstm && images.isEmpty()) {
                             images.add(capImg.getMatrix());
                         }         // first detected blob
                         flattenedBlobs.add(blobClassifier.getBlobContentIn27x15(large, bbb));
@@ -162,9 +162,11 @@ public class FullscreenActivity extends AppCompatActivity {
                         }
                     });
 
-                    if (!labelNames.isEmpty()) {
+
+                    if (lstm && !labelNames.isEmpty()) {
                         classification_display_length = 20;
                     }
+
                 } else {classification_display_length--;}
             }
         });
