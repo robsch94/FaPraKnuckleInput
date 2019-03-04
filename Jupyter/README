@@ -1,5 +1,9 @@
 This Document describes, which notebooks have to be run for the wanted networks.
 
+Baseline:
+    Step_1AB_ReadData
+    Step_2A__1_Baselinecreation
+
 CNN for Finger/Knuckle Recognition:
     Step_1AB_ReadData
     Step_2A_PreprocessData
