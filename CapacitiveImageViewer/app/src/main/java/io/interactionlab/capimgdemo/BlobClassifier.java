@@ -16,7 +16,6 @@ import org.opencv.imgproc.Imgproc;
 import org.tensorflow.Tensor;
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
-import io.interactionlab.capimgdemo.demo.BlobDetectionTest;
 import io.interactionlab.capimgdemo.demo.ModelDescription;
 
 import java.nio.FloatBuffer;
@@ -46,7 +45,6 @@ public class BlobClassifier {
     public void setModel(ModelDescription modelDescription) {
         this.modelDescription = modelDescription;
         inferenceInterface = new TensorFlowInferenceInterface(context.getAssets(), modelDescription.modelPath);
-        //Log.i("Test", "Initialisation of inferenceInterface: "+String.valueOf(inferenceInterface));
     }
 
     public ClassificationResult classify(float[] pixels, boolean lstm) {
@@ -58,10 +56,6 @@ public class BlobClassifier {
         String[] outputNodes = new String[]{outputName};
         float[] outputs = new float[modelDescription.labels.length];
 
-        //Log.i("Test", "inferenceInterface: "+String.valueOf(inferenceInterface));
-        //Tensor a = Tensor.create(modelDescription.inputDimensions, FloatBuffer.wrap(pixels));
-        //Log.i("Test", "Tensor: "+a.toString());
-
         // Feed image into the model and fetch the results.
         inferenceInterface.feed(inputName, pixels, modelDescription.inputDimensions);
         inferenceInterface.run(outputNodes, true);
@@ -69,38 +63,6 @@ public class BlobClassifier {
 
         ClassificationResult cr = new ClassificationResult();
         if (lstm) {
-            /*
-            // Convert concated one-hots
-            float maxConf = Float.MIN_VALUE;
-            float maxConfGest = Float.MIN_VALUE;
-            float maxConfInput = Float.MIN_VALUE;
-            int idxGest = -1;
-            int idxInput = -1;
-            for (int i = 0; i < outputs.length-2; i++) {
-                if (outputs[i] > maxConfGest) {
-                    maxConfGest = outputs[i];
-                    idxGest = i;
-                }
-            }
-            if (outputs[outputs.length-1] > outputs[outputs.length-2]) {
-                idxInput = outputs.length-1;
-                maxConfInput = outputs[outputs.length-1];
-            } else {
-                idxInput = outputs.length-2;
-                maxConfInput = outputs[outputs.length-2];
-            }
-
-            float norm = 0.0f;
-            for (int i = 0; i < outputs.length; i++) {
-                norm += outputs[i];
-            }
-            maxConf = (maxConfGest + maxConfInput) / norm;
-
-            cr.index = idxGest;
-            cr.label = modelDescription.labels[idxInput]+": "+modelDescription.labels[idxGest];
-            cr.confidence = maxConf;
-            cr.color = modelDescription.labelColor[idxGest];
-            */
             // Convert concated one-hots
             float maxConf = Float.MIN_VALUE;
             int idxGest = -1;
@@ -157,7 +119,6 @@ public class BlobClassifier {
 
     public float[] getBlobContentIn27x15(int[][] matrix, BlobBoundingBox bbb) {
         // first extract the blob
-        //Log.i("Test", "Matrix for blob content: "+Arrays.deepToString(matrix));
         int y1 = Math.max(bbb.y1 - 1, 0);
         int y2 = Math.min(bbb.y2 + 1, 29);
         int x1 = Math.max(bbb.x1 - 1, 0);
@@ -167,7 +128,6 @@ public class BlobClassifier {
         for (int y = 0; y < blob.length; y++) {
             for (int x = 0; x < blob[0].length; x++) {
                 blob[y][x] = matrix[y1+y][x1+x];
-                //ArrayIndexOutOfBoundsExepction when finger on the right side of screen
             }
         }
 
@@ -178,8 +138,6 @@ public class BlobClassifier {
                 image[y][x] = blob[y][x];
             }
         }
-        //Log.i("Test", "Blob: \n" + Arrays.deepToString(blob));
-        //Log.i("Test", "Final image: \n" + Arrays.deepToString(image));
 
         float[] result = new float[27*15];
         for(int y = 0; y < 27; y++) {
@@ -192,26 +150,15 @@ public class BlobClassifier {
 
     public int[][] preprocess(CapacitiveImageTS capImg) {
         int[][] matrix = capImg.getMatrix();
-        //TODO: Just for testing purposes
-        //matrix = BlobDetectionTest.t1_pre;
-
-        // find contours of image
         Mat image = int27x15ToPaddedMat(matrix);
-        //Log.i("Test", "Image after int27x15ToMat: \n"+image.dump());
-
         return matToInt2D(image);
     }
 
     public List<BlobBoundingBox> getBlobBoundaries(int[][] matrix) {
-        //TODO: Just for testing purposes
-        //matrix = BlobDetectionTest.t1_pre;
         Mat image = int29x17ToMat(matrix);
         Mat inv_image = new Mat();
         Core.bitwise_not(image, inv_image);
-        //Mat image = new Mat();
-        //Mat inv_image = int29x17ToMat(matrix);
         threshold(inv_image, image, 205, 255, THRESH_BINARY);
-        //Log.i("Test", "Image after threshold: \n"+image.dump());
 
         ArrayList<BlobBoundingBox> blobs = new ArrayList<>();
         List<MatOfPoint> contours = new ArrayList<>();
@@ -258,14 +205,12 @@ public class BlobClassifier {
             }
         }
         BlobBoundingBox bbb = new BlobBoundingBox(x_min, y_min, x_max, y_max);
-        // The BlobBoundingBox is right!!!
         blobs.add(bbb);
         return blobs;
     }
 
     private Mat int27x15ToPaddedMat(int[][] matrix) {
         Mat image = new Mat(29, 17, CvType.CV_8UC1);
-        // np.ones((29,17))
         for (int x = 0; x < 29; x++) {
             for (int y = 0; y < 17; y++) {
                 image.put(x, y, 1);
@@ -274,7 +219,6 @@ public class BlobClassifier {
         // fill in matrix
         for (int x = 0; x < 27; x++) {
             for (int y = 0; y < 15; y++) {
-                //Log.i("Test", String.valueOf(matrix[x][y]));
                 image.put(1+x, 1+y, (double) matrix[x][y]);
             }
         }

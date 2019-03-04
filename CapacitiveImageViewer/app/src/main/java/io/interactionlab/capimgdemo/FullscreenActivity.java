@@ -15,19 +15,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.hcilab.libftsp.LocalDeviceHandler;
-import org.hcilab.libftsp.capacitivematrix.MatrixUtils;
 import org.hcilab.libftsp.capacitivematrix.blobdetection.BlobBoundingBox;
-import org.hcilab.libftsp.capacitivematrix.blobdetection.BlobDetector;
 import org.hcilab.libftsp.capacitivematrix.capmatrix.CapacitiveImageTS;
 import org.hcilab.libftsp.listeners.LocalCapImgListener;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Mat;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import io.interactionlab.capimgdemo.demo.BlobDetectionTest;
 import io.interactionlab.capimgdemo.demo.DemoSettings;
 import io.interactionlab.capimgdemo.demo.ModelDescription;
 
@@ -89,7 +84,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private BlobClassifier blobClassifier;
     private ModelDescription currentModel;
 
-    private boolean lstm = true;
+    private final boolean COMBINED_MODE = true;
     private final static int WINDOW_SIZE = 50;
     private int classification_display_length = 0;
 
@@ -116,40 +111,34 @@ public class FullscreenActivity extends AppCompatActivity {
 
                 if (classification_display_length == 0) {
                     int[][] large = blobClassifier.preprocess(capImg);
-                    //Log.i("Large", "Large right here?? \n" + Arrays.deepToString(large));
                     final List<BlobBoundingBox> blobBoundingBoxes = blobClassifier.getBlobBoundaries(large);
                     final List<String> labelNames = new ArrayList<>();
                     final List<Integer> colors = new ArrayList<>();
                     List<float[]> flattenedBlobs = new ArrayList<>();
 
-                    //TODO: following line just for testing
-                    //matrix = BlobDetectionTest.t1_pre;
-                    //Log.i("Large", "Large still right?? \n" + Arrays.deepToString(large));
-
-                    // if first blob already detected, add each image up to 30
-                    if (lstm && !images.isEmpty()) {
+                    // if first blob already detected, add each image up to WINDOW_SIZE
+                    if (COMBINED_MODE && !images.isEmpty()) {
                         images.add(capImg.getMatrix());
                     }
 
                     for (BlobBoundingBox bbb : blobBoundingBoxes) {
-                        if (lstm && images.isEmpty()) {
+                        if (COMBINED_MODE && images.isEmpty()) {
                             images.add(capImg.getMatrix());
                         }         // first detected blob
                         flattenedBlobs.add(blobClassifier.getBlobContentIn27x15(large, bbb));
                     }
 
-                    if (lstm) {
-                        if (images.size() == WINDOW_SIZE) {                   // classify after 30 images
+                    if (COMBINED_MODE) {
+                        if (images.size() == WINDOW_SIZE) {                   // classify after WINDOW_SIZE images
                             Log.i("Test", "Classifying LSTM+CNN");
-                            ClassificationResult cr = blobClassifier.classify(blobClassifier.imagesToPixels(images), lstm);
+                            ClassificationResult cr = blobClassifier.classify(blobClassifier.imagesToPixels(images), COMBINED_MODE);
                             labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
                             colors.add(cr.color);
                             images.clear();
                         }
                     } else {
                         for (int i = 0; i < flattenedBlobs.size(); i++) {      // always classify
-                            //Log.i("Test", "flattenedBlobs.get(0): "+ Arrays.toString(flattenedBlobs.get(i)));
-                            ClassificationResult cr = blobClassifier.classify(flattenedBlobs.get(i), lstm);
+                            ClassificationResult cr = blobClassifier.classify(flattenedBlobs.get(i), COMBINED_MODE);
                             labelNames.add(cr.label + " (" + ((int) Math.round(cr.confidence * 100)) + "%)");
                             colors.add(cr.color);
                         }
@@ -158,12 +147,12 @@ public class FullscreenActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            drawView.updateView(capImg, blobBoundingBoxes, labelNames, colors, lstm);
+                            drawView.updateView(capImg, blobBoundingBoxes, labelNames, colors, COMBINED_MODE);
                         }
                     });
 
 
-                    if (lstm && !labelNames.isEmpty()) {
+                    if (COMBINED_MODE && !labelNames.isEmpty()) {
                         classification_display_length = 20;
                     }
 
