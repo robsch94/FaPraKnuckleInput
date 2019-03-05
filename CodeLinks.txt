@@ -2,10 +2,10 @@ All Jupyter Notebooks (see README in this folder for further information):
     https://01.jupyter.interactionlab.io/user/robsch94/tree/FaPraKnuckleInput/Jupyter
 
 Study App Code:
-    https://01.jupyter.interactionlab.io/user/robsch94/tree/FaPraKnuckleInput/KnuckleInput
+    https://01.jupyter.interactionlab.io/user/robsch94/tree/FaPraKnuckleInput/Apps/KnuckleInput
     
 WizardGui:
-    https://01.jupyter.interactionlab.io/user/robsch94/tree/FaPraKnuckleInput/WizardGui
+    https://01.jupyter.interactionlab.io/user/robsch94/tree/FaPraKnuckleInput/Apps/WizardGui
     
 Demo App Code:
-    https://01.jupyter.interactionlab.io/user/robsch94/tree/FaPraKnuckleInput/CapacitiveImageViewer
+    https://01.jupyter.interactionlab.io/user/robsch94/tree/FaPraKnuckleInput/Apps/CapacitiveImageViewer
