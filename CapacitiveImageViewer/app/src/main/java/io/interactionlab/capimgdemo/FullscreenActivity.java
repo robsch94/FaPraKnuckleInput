@@ -202,7 +202,7 @@ public class FullscreenActivity extends AppCompatActivity {
             }
         });
 
-        setModel(DemoSettings.models[0]);
+        setModel((!COMBINED_MODE) ? DemoSettings.models[0] : DemoSettings.models[1]);
     }
 
 

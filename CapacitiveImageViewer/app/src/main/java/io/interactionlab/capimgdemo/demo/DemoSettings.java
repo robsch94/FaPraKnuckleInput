@@ -17,15 +17,15 @@ public class DemoSettings {
     }
 
     public static ModelDescription[] models = new ModelDescription[]{
-//            new ModelDescription(
-//                    "KnuckleFinger",
-//                    "file:///android_asset/10_01_19.pb",
-//                    "conv2d_1_input",
-//                    "output_node0",
-//                    new long[]{1, 27, 15, 1},
-//                    new String[]{"Knuckle", "Finger"},
-//                    new int[]{Color.GREEN, Color.YELLOW}
-//            )
+            new ModelDescription(
+                    "KnuckleFinger",
+                    "file:///android_asset/10_01_19.pb",
+                    "conv2d_1_input",
+                    "output_node0",
+                    new long[]{1, 27, 15, 1},
+                    new String[]{"Knuckle", "Finger"},
+                    new int[]{Color.GREEN, Color.YELLOW}
+            ),
             new ModelDescription(
                     "GestureRecognition",
                     "file:///android_asset/KnuckleFinger_LSTM_Jan_20190203_230639.pb",
