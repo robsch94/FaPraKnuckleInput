@@ -4,7 +4,7 @@ Mobile devices have become by far the most important digital devices over the la
 
 ## Demo App
 
-The Demo app is located under CapacitiveImageViewer/. It is capable of distinguishing:
+The Demo app is located under Apps/CapacitiveImageViewer/. It is capable of distinguishing:
 * finger/knuckle input via CNN
 * gestures via combined CNN + LSTM
 
@@ -13,7 +13,7 @@ To switch between the two modes:
 * LSTM + CNN: in FullscreenActivity.java line 87, set the COMBINED_MODE variable = true and adjust the WINDOW_SIZE to your model.
 
 ## Study App
-The Study app was used for data collection. The phone app is located under KnuckleFinger/, the GUI for the PC under WizardGUI/. The following steps need to be executed:
+The Study app was used for data collection. The phone app is located under Apps/KnuckleFinger/, the GUI for the PC under WizardGUI/. The following steps need to be executed:
 * Change the PC_IP variable in TaskActivity.java
 * Change the PHONE_IP in WizardGUI/Starter.py
 * Run the KnuckleFinger app
