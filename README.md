@@ -4,20 +4,21 @@ Mobile devices have become by far the most important digital devices over the la
 
 ## Demo App
 
-The Demo app is located under CapacitiveImageViewer/. It is capable of distinguishing:
+The Demo app is located under Apps/CapacitiveImageViewer/. It is capable of distinguishing:
 * finger/knuckle input via CNN
 * gestures via combined CNN + LSTM
 
-To switch between the two modes:
-* CNN: in FullscreenActivity.java line 87, set the COMBINED_MODE variable = false.
-* LSTM + CNN: in FullscreenActivity.java line 87, set the COMBINED_MODE variable = true and adjust the WINDOW_SIZE to your model.
+To switch between the two modes you need to change the Apps/CapacitiveImageViewer/app/src/main/java/io/interactionlab/capimgdemo/FullScreenActivity.java file:
+* CNN: in line 87, set the COMBINED_MODE variable = false.
+* LSTM + CNN: in line 87, set the COMBINED_MODE variable = true and adjust the WINDOW_SIZE to your model.
 
 ## Study App
-The Study app was used for data collection. The phone app is located under KnuckleFinger/, the GUI for the PC under WizardGUI/. The following steps need to be executed:
-* Change the PC_IP variable in TaskActivity.java
-* Change the PHONE_IP in WizardGUI/Starter.py
+
+The Study app was used for data collection. The phone app is located under Apps/KnuckleInput/, the GUI for the PC under WizardGUI/. The following steps need to be executed:
+* Change the PC_IP variable in Apps/KnuckleInput/app/src/main/java/uni/vis/janle/knuckleinput/TaskActivity.java
+* Change the PHONE_IP in Apps/WizardGUI/Starter.py
 * Run the KnuckleFinger app
-* Run the WizardGUI/Starter.py file
+* Run the Apps/WizardGUI/Starter.py file
 
 ## Jupyter
 This section describes, which notebooks have to be run for the wanted networks. All notebooks are located under Jupyter/
