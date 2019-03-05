@@ -31,6 +31,7 @@ import java.util.Collections;
 public class TaskActivity extends AppCompatActivity {
     private String TAG = "TaskActivity";
 
+    public final String PC_IP = "192.168.1.100";
     public int[] versionIDs = new int[34];  // distuingishes the version (how often the current task appeared yet), index is taskID
     public int repititionID;  // revertButton
     public List<TaskContentDescription> taskContDescs = new ArrayList<>();
@@ -267,7 +268,7 @@ public class TaskActivity extends AppCompatActivity {
                 Log.i("fileOutput", result);
 
                 // send via udp
-                DatagramPacket packet = new DatagramPacket(result.getBytes(), result.getBytes().length, InetAddress.getByName("192.168.1.100"), UDP_SERVER_PORT);
+                DatagramPacket packet = new DatagramPacket(result.getBytes(), result.getBytes().length, InetAddress.getByName(PC_IP), UDP_SERVER_PORT);
 
                 if (udp_sock != null) {
                     udp_sock.send(packet);
