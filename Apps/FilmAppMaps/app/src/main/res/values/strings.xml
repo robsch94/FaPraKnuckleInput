@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">FilmAppMaps</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="goto_map">Goto Map</string>
+</resources>

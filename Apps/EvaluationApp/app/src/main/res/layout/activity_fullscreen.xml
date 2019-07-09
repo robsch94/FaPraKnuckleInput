@@ -14,6 +14,55 @@
         android:layout_alignParentTop="true"
         android:background="#ffffff"
         android:orientation="horizontal">
-
+        <ViewFlipper
+            android:id="@+id/flip"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <EditText
+                android:id="@+id/tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="40dp"
+                android:layout_margin="5dp"
+                android:padding="5dp"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@android:color/black"
+                android:text="The rabbit-hole went straight on like a tunnel for some way and then dipped suddenly down, so suddenly that Alice had not a moment to think about stopping herself before she found herself falling down what seemed to be a very deep well."
+                />
+            <TextView
+                android:id="@+id/paste1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="40dp"
+                android:layout_margin="5dp"
+                android:padding="5dp"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@android:color/black"
+                android:text="Down, down, down! Would the fall never come to an end? There was nothing else to do, so Alice soon began talking to herself. &quot;Dinah'll miss me very much to-night, I should think!&quot; (Dinah was the cat.)"
+                />
+            <TextView
+                android:id="@+id/paste2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="40dp"
+                android:layout_margin="5dp"
+                android:padding="5dp"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@android:color/black"
+                android:text="Away went Alice like the wind and was just in time to hear it say, as it turned a corner, 'Oh, my ears and whiskers, how late it's getting!' She was close behind it when she turned the corner, but the Rabbit was no longer to be seen."                />
+        </ViewFlipper>
     </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/markerLeft"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/marker_left"
+        android:visibility="invisible"/>
+    <ImageView
+        android:id="@+id/markerRight"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/marker_right"
+        android:visibility="invisible"/>
 </RelativeLayout>

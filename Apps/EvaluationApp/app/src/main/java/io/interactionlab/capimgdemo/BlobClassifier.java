@@ -16,6 +16,7 @@ import org.opencv.imgproc.Imgproc;
 import org.tensorflow.Tensor;
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
+import io.interactionlab.capimgdemo.demo.DemoSettings;
 import io.interactionlab.capimgdemo.demo.ModelDescription;
 
 import java.nio.FloatBuffer;
@@ -33,21 +34,55 @@ import static org.opencv.imgproc.Imgproc.threshold;
  */
 
 public class BlobClassifier {
-    private static TensorFlowInferenceInterface inferenceInterface;
     private Context context;
     private ModelDescription modelDescription;
+    private static final ModelDescription cnnModel = DemoSettings.models[0];
+    private static final ModelDescription lstmModel = DemoSettings.models[1];
+    private static TensorFlowInferenceInterface cnnInferenceInterface;
+    private static TensorFlowInferenceInterface lstmInferenceInterface;
 
     BlobClassifier(Context context) {
         // Loading model from assets folder.
         this.context = context;
+        cnnInferenceInterface = new TensorFlowInferenceInterface(context.getAssets(), cnnModel.modelPath);
+        lstmInferenceInterface = new TensorFlowInferenceInterface(context.getAssets(), lstmModel.modelPath);
+}
+
+    public ClassificationResult getLSTMIndex(float[] outputs) {
+        ClassificationResult cr = new ClassificationResult();
+        // Convert concated one-hots
+        float maxConf = Float.MIN_VALUE;
+        int idxGest = -1;
+        for (int i = 0; i < outputs.length; i++) {
+            if (outputs[i] > maxConf) {
+                maxConf = outputs[i];
+                idxGest = i;
+            }
+        }
+        cr.index = idxGest;
+        cr.label = lstmModel.labels[idxGest];
+        return cr;
     }
 
-    public void setModel(ModelDescription modelDescription) {
-        this.modelDescription = modelDescription;
-        inferenceInterface = new TensorFlowInferenceInterface(context.getAssets(), modelDescription.modelPath);
+    public ClassificationResult getCNNIndex(float[] outputs) {
+        ClassificationResult cr = new ClassificationResult();
+        cr.index = (outputs[0] > outputs[1]) ? 0 : 1;
+        cr.label = cnnModel.labels[cr.index];
+        return cr;
     }
 
-    public ClassificationResult classify(float[] pixels) {
+    public ClassificationResult classify(float[] pixels, boolean cnn) {
+        TensorFlowInferenceInterface inferenceInterface;
+        ModelDescription modelDescription;
+        if (cnn) {
+            inferenceInterface = cnnInferenceInterface;
+            modelDescription = cnnModel;
+        }
+        else {
+            inferenceInterface = lstmInferenceInterface;
+            modelDescription = lstmModel;
+        }
+
         // Node Names
         String inputName = modelDescription.inputNode;
         String outputName = modelDescription.outputNode;
@@ -61,27 +96,9 @@ public class BlobClassifier {
         inferenceInterface.run(outputNodes, true);
         inferenceInterface.fetch(outputName, outputs);
 
-        ClassificationResult cr = new ClassificationResult();
-        // Convert concated one-hots
-        float maxConf = Float.MIN_VALUE;
-        int idxGest = -1;
-        for (int i = 0; i < outputs.length; i++) {
-            if (outputs[i] > maxConf) {
-                maxConf = outputs[i];
-                idxGest = i;
-            }
-        }
-        float norm = 0.0f;
-        for (int i = 0; i < outputs.length; i++) {
-            norm += outputs[i];
-        }
-        maxConf = maxConf / norm;
-
-        cr.index = idxGest;
-        cr.label = modelDescription.labels[idxGest];
-        cr.confidence = maxConf;
-        cr.color = modelDescription.labelColor[idxGest];
-        return cr;
+        //return outputs;
+        if (cnn) {return getCNNIndex(outputs);}
+        else {return getLSTMIndex(outputs);}
     }
 
     public float[] imagesToPixels(List<int[][]> images) {
@@ -135,7 +152,7 @@ public class BlobClassifier {
         Mat image = int29x17ToMat(matrix);
         Mat inv_image = new Mat();
         Core.bitwise_not(image, inv_image);
-        threshold(inv_image, image, 205, 255, THRESH_BINARY);
+        threshold(inv_image, image, 200, 255, THRESH_BINARY);    //205
 
         ArrayList<BlobBoundingBox> blobs = new ArrayList<>();
         List<MatOfPoint> contours = new ArrayList<>();
@@ -148,7 +165,7 @@ public class BlobClassifier {
         // get max contour
         MatOfPoint max_contour = new MatOfPoint(new Point(5, 5));
         for (int i = 0; i < contours.size(); i++) {
-            if (contourArea(contours.get(i)) > 5 && contourArea(contours.get(i)) < 255) {
+            if (contourArea(contours.get(i)) > 8 && contourArea(contours.get(i)) < 255) {    // > 5
                 if (contourArea(contours.get(i)) > contourArea(max_contour)) {
                     max_contour = contours.get(i);
                 }

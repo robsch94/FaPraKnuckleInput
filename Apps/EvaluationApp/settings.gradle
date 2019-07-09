@@ -1,5 +1,4 @@
 include ':app'
 
-include ':openCVLibrary341'
-include ':openCVLibrary310'
-include ':openCVLibrary310'
+include ':openCVLibrary310', ':app'
+project(':openCVLibrary310').projectDir = new File(settingsDir, '../Dependencies/openCVLibrary310')

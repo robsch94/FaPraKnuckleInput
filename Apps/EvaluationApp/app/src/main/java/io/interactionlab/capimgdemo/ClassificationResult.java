@@ -7,6 +7,4 @@ package io.interactionlab.capimgdemo;
 public class ClassificationResult {
     int index;
     String label;
-    double confidence;
-    int color;
 }
