@@ -4,8 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -15,6 +19,8 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,10 +53,14 @@ public class WebActivity extends AppCompatActivity {
 
     private LocalDeviceHandler localDeviceHandler;
 
+    private int gestureIndex = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web);
+
+        setTitle("Browser");
 
         Window window = this.getWindow();
 
@@ -65,11 +75,37 @@ public class WebActivity extends AppCompatActivity {
 
         webview =(WebView)findViewById(R.id.webView);
 
-        webview.setWebViewClient(new WebViewClient());
+        webview.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                webview.findAllAsync("Finkenau 35, 22081 Hamburg");//, Edmund-Siemers-Allee 1, 20146 Hamburg");
+                Method m = null;
+                try {
+                    m = WebView.class.getMethod("setFindIsUp", Boolean.TYPE);
+                    m.invoke(webview, true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                webview.scrollTo(0,-500);
+            }
+        });
         webview.getSettings().setJavaScriptEnabled(true);
         webview.getSettings().setDomStorageEnabled(true);
         webview.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
-        webview.loadUrl("https://muc2019.mensch-und-computer.de/");
+        webview.loadUrl("http://129.69.180.77/muc.html");
+        //webview.scrollTo(0,1500);
+        webview.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return (event.getAction() == MotionEvent.ACTION_MOVE);
+            }
+        });
+        Canvas c = new Canvas();
+        Paint myPaint = new Paint();
+        myPaint.setColor(Color.rgb(0, 0, 0));
+        myPaint.setStrokeWidth(10);
+        c.drawRect(100, 100, 200, 200, myPaint);
+        //webview.loadUrl("javascript:window.document.getElementById('pgc-521-5-0').style.display='none';");
 
         blobClassifier = new BlobClassifier(this);
 
@@ -150,6 +186,15 @@ public class WebActivity extends AppCompatActivity {
     protected void executeGesture(int index, int cnnIndex) {
         Log.i("GestureIndex", String.valueOf(index));
         Log.i("CnnIndex", String.valueOf(cnnIndex));
+
+
+        if (gestureIndex==0) {
+            copy();
+            gestureIndex = 1;
+        } else if (gestureIndex==1) {
+            startMapActivity(new View(this));
+        }
+        /*
         if (cnnIndex==0) {
              if (index == 1) {   // Knuckle two tap
                 copy();
@@ -157,6 +202,7 @@ public class WebActivity extends AppCompatActivity {
                 startMapActivity(new View(this));
             }
         }
+        */
     }
 
     protected void copy() {

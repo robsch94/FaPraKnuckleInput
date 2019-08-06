@@ -250,7 +250,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    editText.setText("Universität Hamburg Edmund-Siemers-Allee 1 20146 Hamburg");
+                    editText.setText("Finkenau 35, 22081 Hamburg");
                     search();
                 }
             });
@@ -262,7 +262,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
         editText.clearFocus();
         //Universität Hamburg Edmund-Siemers-Allee 1 20146 Hamburg
-        LatLng muc = new LatLng(53.563028, 9.988391);
+        LatLng muc = new LatLng(53.569034, 10.033032);
         CameraUpdate muc_update = CameraUpdateFactory.newLatLngZoom(muc, 17f);
         mMap.addMarker(new MarkerOptions().position(muc).title("MUC"));
         mMap.animateCamera(muc_update);

@@ -205,7 +205,7 @@ public class FullscreenActivity extends AppCompatActivity {
         textViewMode = new TextView(this);
         textViewMode.setText(Html.fromHtml("x"));
         textViewMode.setTextColor(Color.WHITE);
-        textViewMode.setTextSize(25);
+        textViewMode.setTextSize(35);
         textViewMode.setBackgroundColor(Color.TRANSPARENT);
         RelativeLayout.LayoutParams tvmLayout = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         tvmLayout.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);
